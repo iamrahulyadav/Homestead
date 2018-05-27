@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.spauldhaliwal.homestead.MainActivity">
+    <item
+        android:id="@+id/action_signout"
+        android:orderInCategory="100"
+        android:title="Sign Out"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menuChatItem"
+        android:icon="?android:attr/listChoiceIndicatorSingle"
+        android:title="Chat"
+        app:showAsAction="ifRoom" />
+</menu>

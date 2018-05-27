@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1014877103426",
+    "firebase_url": "https://homestead-5bb0d.firebaseio.com",
+    "project_id": "homestead-5bb0d",
+    "storage_bucket": "homestead-5bb0d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1014877103426:android:304bbad5178d1388",
+        "android_client_info": {
+          "package_name": "com.spauldhaliwal.homestead"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1014877103426-7p3t9hdhdam7sd9fmfpiqmgrn3tgn0pg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.spauldhaliwal.homestead",
+            "certificate_hash": "6c98e2292209bcac312b4ed99d7bd814246d69c9"
+          }
+        },
+        {
+          "client_id": "1014877103426-27sqo00ttuk4bs9dk1p1p82gp62v39i9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjARESaHfvekn2cgqCE5WpfyaWHA77YgM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1014877103426-27sqo00ttuk4bs9dk1p1p82gp62v39i9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
