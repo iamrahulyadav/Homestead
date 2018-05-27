@@ -47,6 +47,7 @@ public abstract class FirebaseResolver {
         } else {
             if (name.length() > 0) {
                 // Retrieve current user's node in /Users
+                //
                 DatabaseReference userHomesteadRef = FirebaseDatabase
                         .getInstance()
                         .getReference()
@@ -173,7 +174,6 @@ public abstract class FirebaseResolver {
             String notificationId = senderNotifications.push().getKey();
             NotificationModel notificationModel = new NotificationModel(message, notificationId, senderId);
             senderNotifications.child(notificationId).setValue(notificationModel);
-
 
 
             Log.d(TAG, "sendMessage: sending" + messageModel.toString());
