@@ -87,6 +87,8 @@ public class ChatRecyclerAdapter extends FirebaseRecyclerAdapter<MessageModel, R
 
         }
 
+        //TODO Fix message expansion animations
+
 //        if (model.getSenderUid().equals(CurrentUser.getUid())) {
 //            return VIEW_TYPE_MESSAGE_OUTGOING;
 //        } else {
