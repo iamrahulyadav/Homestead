@@ -36,6 +36,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Arrays;
 
@@ -136,6 +137,9 @@ public class MainActivity extends AppCompatActivity {
                                     Intent intent = new Intent(MainActivity.this, MainActivity.class);
                                     startActivity(intent);
                                     finish();
+
+                                    FirebaseMessaging.getInstance()
+                                            .subscribeToTopic(CurrentUser.getHomesteadUid() + MessagesContract.NOTIFICATIONS);
                                 }
                             });
 

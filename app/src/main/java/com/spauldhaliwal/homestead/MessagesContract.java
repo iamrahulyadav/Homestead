@@ -6,4 +6,5 @@ public abstract class MessagesContract {
     static final String CONTENT = "content";
     static final String SENDER_ID = "senderUid";
     static final String SENDER_PROFILE_IMAGE = "senderProfileImage";
+    static final String NOTIFICATIONS = "_MessagesNotifications";
 }
