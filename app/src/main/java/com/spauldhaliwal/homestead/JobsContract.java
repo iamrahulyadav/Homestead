@@ -15,7 +15,7 @@ import static com.spauldhaliwal.homestead.AppProvider.CONTENT_AUTHORITY_URI;
 public class JobsContract {
 
     static final String ROOT_NODE = "Jobs";
-
+    static final String TYPE = "job";
     public static final String _ID = BaseColumns._ID;
     public static final String NAME = "name";
     public static final String OWNER = "owner";

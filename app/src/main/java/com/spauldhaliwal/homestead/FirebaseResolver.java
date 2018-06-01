@@ -70,9 +70,25 @@ public abstract class FirebaseResolver {
                                 .child(userHomesteadId)
                                 .child(HomesteadsContract.JOBS_NODE);
 
+                        DatabaseReference homesteadNotifications = FirebaseDatabase
+                                .getInstance()
+                                .getReference(HomesteadsContract.ROOT_NODE)
+                                .child(CurrentUser.getHomesteadUid())
+                                .child(HomesteadsContract.NOTIFICATIONS);
+
                         String id = homesteadsJob.push().getKey();
                         job = new JobModel(id, name, description, creatorId, creatorImage, isPrivate);
                         homesteadsJob.child(id).setValue(job);
+
+                        String notificationId = homesteadNotifications.push().getKey();
+                        NotificationModel notificationModel = new NotificationModel(CurrentUser.getName(),
+                                name,
+                                description,
+                                notificationId,
+                                creatorId,
+                                JobsContract.TYPE);
+
+                        homesteadNotifications.child(notificationId).setValue(notificationModel);
                     }
 
                     @Override
@@ -178,7 +194,13 @@ public abstract class FirebaseResolver {
             messageRef.child(id).setValue(messageModel);
 
             String notificationId = homesteadNotifications.push().getKey();
-            NotificationModel notificationModel = new NotificationModel(senderName, message, notificationId, senderId);
+            NotificationModel notificationModel = new NotificationModel(senderName,
+                    null,
+                    message,
+                    notificationId,
+                    senderId,
+                    MessagesContract.TYPE);
+
             homesteadNotifications.child(notificationId).setValue(notificationModel);
 
 
