@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
                                     finish();
 
                                     FirebaseMessaging.getInstance()
-                                            .subscribeToTopic(CurrentUser.getHomesteadUid() + MessagesContract.NOTIFICATIONS);
+                                            .subscribeToTopic(CurrentUser.getHomesteadUid() + HomesteadsContract.NOTIFICATIONS);
                                 }
                             });
 

@@ -4,14 +4,20 @@ import java.io.Serializable;
 
 public class NotificationModel implements Serializable {
 
-        private String message;
-        private String notificationId;
-        private String senderUid;
+    private String from;
+    private String message;
+    private String notificationId;
+    private String senderUid;
 
-    public NotificationModel(String message, String notificationId, String senderUid) {
+    public NotificationModel(String from, String message, String notificationId, String senderUid) {
+        this.from = from;
         this.message = message;
         this.notificationId = notificationId;
         this.senderUid = senderUid;
+    }
+
+    public String getFrom() {
+        return from;
     }
 
     public String getMessage() {
@@ -24,15 +30,5 @@ public class NotificationModel implements Serializable {
 
     public String getSenderUid() {
         return senderUid;
-    }
-
-
-    @Override
-    public String toString() {
-        return "NotificationModel{" +
-                "message='" + message + '\'' +
-                ", notificationId='" + notificationId + '\'' +
-                ", senderUid='" + senderUid + '\'' +
-                '}';
     }
 }

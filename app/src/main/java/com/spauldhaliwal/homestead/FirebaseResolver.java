@@ -160,6 +160,12 @@ public abstract class FirebaseResolver {
                 .child(CurrentUser.getUid())
                 .child(UsersContract.NOTIFICATIONS);
 
+        final DatabaseReference homesteadNotifications = FirebaseDatabase
+                .getInstance()
+                .getReference(HomesteadsContract.ROOT_NODE)
+                .child(CurrentUser.getHomesteadUid())
+                .child(HomesteadsContract.NOTIFICATIONS);
+
         if (message.length() > 0) {
             DatabaseReference messageRef = FirebaseDatabase
                     .getInstance()
@@ -171,9 +177,9 @@ public abstract class FirebaseResolver {
             MessageModel messageModel = new MessageModel(message, id, senderId, senderName, timeSent, senderProfileImage);
             messageRef.child(id).setValue(messageModel);
 
-            String notificationId = senderNotifications.push().getKey();
-            NotificationModel notificationModel = new NotificationModel(message, notificationId, senderId);
-            senderNotifications.child(notificationId).setValue(notificationModel);
+            String notificationId = homesteadNotifications.push().getKey();
+            NotificationModel notificationModel = new NotificationModel(senderName, message, notificationId, senderId);
+            homesteadNotifications.child(notificationId).setValue(notificationModel);
 
 
             Log.d(TAG, "sendMessage: sending" + messageModel.toString());
