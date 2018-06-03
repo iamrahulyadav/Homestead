@@ -44,8 +44,6 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
         String GROUP_KEY_CHAT = "com.spauldhaliwal.homestead.CHAT_NOTIFICATION";
         String GROUP_KEY_JOBS = "com.spauldhaliwal.homestead.JOB_NOTIFICATION";
 
-
-
         String channelId;
 
         if (notificationType.equals(MessagesContract.TYPE)) {
@@ -92,7 +90,7 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
                 manager.createNotificationChannel(channel);
             }
 
-            manager.notify(1, builder.build());
+            manager.notify((int) System.currentTimeMillis(), builder.build());
         }
 
 
