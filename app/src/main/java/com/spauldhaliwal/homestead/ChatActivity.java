@@ -50,7 +50,7 @@ public class ChatActivity extends AppCompatActivity {
 
     Vibrator vibe;
 
-    private static final int TOTAL_ITEMS_TO_ADD = 20;
+    private static final int TOTAL_ITEMS_TO_ADD = 50;
     private int currentPage = 1;
 //    private SwipeRefreshLayout swipeRefreshLayout;
 
@@ -60,8 +60,7 @@ public class ChatActivity extends AppCompatActivity {
     private String prevMessageKey;
     ChildEventListener childEventListener;
 
-    private int moreMessagesLoadedCount =0;
-
+    private int moreMessagesLoadedCount = 0;
 
 
 //    SparseIntArray expandedItems = new SparseIntArray();
@@ -93,19 +92,20 @@ public class ChatActivity extends AppCompatActivity {
         chatAdapter = new ChatAdapter(messagesList);
         messageListView.setAdapter(chatAdapter);
 
-        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+        //Endless scroll code
+//        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+//            @Override
+//            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+//
+//                currentPage++;
+//                itemPos = 0;
+//                loadMoreMessages();
+//
+//            }
+//        };
 
-                currentPage++;
-                itemPos = 0;
-                loadMoreMessages();
-
-            }
-        };
-
-        messageListView.addOnScrollListener(scrollListener);
-
+//        messageListView.addOnScrollListener(scrollListener);
+//
         loadMessages();
         ItemClickSupport.addTo(messageListView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
 
@@ -158,7 +158,7 @@ public class ChatActivity extends AppCompatActivity {
                         System.currentTimeMillis(),
                         CurrentUser.getProfileImage())) {
                     editMessage.setText("");
-                    linearLayoutManager.smoothScrollToPosition(messageListView, null, chatAdapter.getItemCount());
+                    linearLayoutManager.smoothScrollToPosition(messageListView, null, chatAdapter.getItemCount()+1);
                 } else {
                     Toast.makeText(ChatActivity.this, "Message empty", Toast.LENGTH_SHORT).show();
                 }
@@ -199,10 +199,6 @@ public class ChatActivity extends AppCompatActivity {
                         lastMessageKey = messageKey;
                     }
                 }
-
-
-
-
 
 
             }
