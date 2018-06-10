@@ -21,9 +21,15 @@ public class JobsContract {
     public static final String OWNER = "owner";
     public static final String CREATOR = "creator";
     public static final String DESCRIPTION = "description";
-    public static final String STATUS = "status";
+
+    public static final int STATUS_OPEN = 0;
+    public static final int STATUS_CLAIMED = 1;
+    public static final int STATUS_CLOSED = 2;
+
     public static final String SCOPE = "scope";
     public static final String SORT_ORDER = "sortOrder";
+
+
 
 
     /**

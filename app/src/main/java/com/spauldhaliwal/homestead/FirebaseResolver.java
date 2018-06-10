@@ -35,7 +35,8 @@ public abstract class FirebaseResolver {
                         .child(UsersContract.JOBS_NODE);
 
                 String id = databaseJobs.push().getKey();
-                job = new JobModel(id, name, description, creatorId, creatorImage, isPrivate);
+
+                job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_CLAIMED ,isPrivate);
 
                 userRef.child(id).setValue(job);
                 Log.d(TAG, "insertJob: inserting " + job.toString());
@@ -77,7 +78,7 @@ public abstract class FirebaseResolver {
                                 .child(HomesteadsContract.NOTIFICATIONS);
 
                         String id = homesteadsJob.push().getKey();
-                        job = new JobModel(id, name, description, creatorId, creatorImage, isPrivate);
+                        job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_OPEN, isPrivate);
                         homesteadsJob.child(id).setValue(job);
 
                         String notificationId = homesteadNotifications.push().getKey();

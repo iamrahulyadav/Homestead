@@ -43,6 +43,10 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
         String notificationSender = notificationData.get("sender").toString();
         String notificationBody = notificationData.get("body").toString();
 
+
+
+
+
         String GROUP_KEY_CHAT = "com.spauldhaliwal.homestead.CHAT_NOTIFICATION";
         String GROUP_KEY_JOBS = "com.spauldhaliwal.homestead.JOB_NOTIFICATION";
 
