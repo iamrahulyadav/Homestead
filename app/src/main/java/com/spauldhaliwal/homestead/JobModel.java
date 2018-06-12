@@ -14,6 +14,7 @@ class JobModel implements Serializable {
     private String creatorIdImage;
     private String description;
     private int status;
+    private String owner;
 //    private long dateAdded;
     private boolean isPrivate;
 
@@ -21,7 +22,7 @@ class JobModel implements Serializable {
     public JobModel() {
     }
 
-    public JobModel(String id, String name, String description, String creatorId, String creatorIdImage , int status ,boolean isPrivate) {
+    public JobModel(String id, String name, String description, String creatorId, String creatorIdImage , int status, String owner ,boolean isPrivate) {
         this.id = id;
         this.name = name;
         this.creatorId = creatorId;
@@ -31,7 +32,7 @@ class JobModel implements Serializable {
         this.isPrivate = isPrivate;
     }
 
-    public JobModel(String id, String name, String description, boolean isPrivate) {
+    public JobModel(String id, String name, String description, int status, String owner, boolean isPrivate) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -67,8 +68,25 @@ class JobModel implements Serializable {
         return status;
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
     public boolean isIsPrivate() {
         return isPrivate;
     }
 
+    @Override
+    public String toString() {
+        return "JobModel{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", creatorId='" + creatorId + '\'' +
+                ", creatorIdImage='" + creatorIdImage + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", owner='" + owner + '\'' +
+                ", isPrivate=" + isPrivate +
+                '}';
+    }
 }

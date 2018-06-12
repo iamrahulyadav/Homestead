@@ -92,4 +92,25 @@
         app:layout_constraintTop_toTopOf="@+id/editName"
         tools:text="Privacy" />
 
+    <CheckBox
+        android:id="@+id/claimTaskCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
+
+    <TextView
+        android:id="@+id/claimTaskText"
+        android:layout_width="wrap_content"
+        android:layout_height="17dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Claim Task"
+        app:layout_constraintEnd_toStartOf="@+id/claimTaskCheckBox"
+        app:layout_constraintTop_toTopOf="@+id/claimTaskCheckBox"
+        tools:text="Claim Task" />
+
 </android.support.constraint.ConstraintLayout>

@@ -16,6 +16,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Switch;
@@ -39,6 +40,8 @@ public class AddEditActivity extends AppCompatActivity {
 
 
     static String jobId;
+    static int jobStatus;
+    static String jobOwner;
     static boolean jobScope;
 
     private editMode mMode;
@@ -68,6 +71,9 @@ public class AddEditActivity extends AppCompatActivity {
         KeyListener editDescriptionListener = editName.getKeyListener();
         editDescription.setKeyListener(editDescriptionListener);
 
+        final CheckBox claimTaskCheckBox = findViewById(R.id.claimTaskCheckBox);
+        TextView claimTaskTextView = findViewById(R.id.claimTaskText);
+
         ImageButton saveButton = findViewById(R.id.editSaveButton);
         ImageButton deleteButon = findViewById(R.id.editDeleteButton);
 
@@ -88,12 +94,17 @@ public class AddEditActivity extends AppCompatActivity {
             if (!job.getCreatorId().equals(CurrentUser.getUid())) {
                 editName.setKeyListener(null);
                 editDescription.setKeyListener(null);
-                saveButton.setVisibility(View.GONE);
+//                saveButton.setVisibility(View.GONE);
                 deleteButon.setVisibility(View.GONE);
             }
             jobId = job.getId();
             jobScope = job.isIsPrivate();
+            jobStatus = job.getStatus();
             Log.d(TAG, "onCreate: Job isPrivate: " + jobScope);
+
+            if (jobStatus != JobsContract.STATUS_OPEN) {
+                claimTaskCheckBox.setEnabled(false);
+            }
 
             editName.setText(job.getName());
             editDescription.setText(job.getDescription());
@@ -104,6 +115,9 @@ public class AddEditActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "onCreate: No previous job found. Creating new job");
 
+            claimTaskTextView.setVisibility(View.GONE);
+            Log.d(TAG, "onCreate: claimTaskTextViewVisibility: " + claimTaskTextView.getVisibility()) ;
+            claimTaskCheckBox.setVisibility(View.GONE);
             deleteButon.setVisibility(View.GONE);
             editName.requestFocus();
             mMode = editMode.ADD;
@@ -120,6 +134,24 @@ public class AddEditActivity extends AppCompatActivity {
                 }
             }
         });
+
+//        claimTaskCheckBox.setOnClickListener(new View.OnClickListener() {
+//            String name = editName.getText().toString();
+//            String description = editDescription.getText().toString();
+//
+//
+//            @Override
+//            public void onClick(View v) {
+//                jobStatus = JobsContract.STATUS_CLAIMED;
+//                jobOwner = CurrentUser.getUid();
+//                FirebaseResolver.updateJob(jobId,
+//                        name,
+//                        description,
+//                        jobStatus,
+//                        jobOwner,
+//                        jobScope);
+//            }
+//        });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,13 +174,34 @@ public class AddEditActivity extends AppCompatActivity {
                         break;
                     case EDIT:
                         Log.d(TAG, "Save Button onClick: EditMode is " + mMode);
-                        if (FirebaseResolver.updateJob(jobId,
-                                name,
-                                description,
-                                jobScope)) {
-                            finish();
+                        if (claimTaskCheckBox.isChecked()) {
+                            Log.d(TAG, "onClick: claimTaskCheckBox is " + claimTaskCheckBox.isChecked());
+                            int jobStatus = 1;
+                            Log.d(TAG, "onClick: jobStatusInput = " + jobStatus);
+                            jobOwner = CurrentUser.getUid();
+
+                            if (FirebaseResolver.updateJob(jobId,
+                                    name,
+                                    description,
+                                    JobsContract.STATUS_CLAIMED,
+                                    CurrentUser.getUid(),
+                                    jobScope)) {
+                                finish();
+                            } else {
+                                Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
+                            }
+
                         } else {
-                            Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
+                            if (FirebaseResolver.updateJob(jobId,
+                                    name,
+                                    description,
+                                    jobStatus,
+                                    jobOwner,
+                                    jobScope)) {
+                                finish();
+                            } else {
+                                Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
+                            }
                         }
                         break;
                 }
@@ -174,12 +227,8 @@ public class AddEditActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        int id = item.getItemId();
         switch (id) {
             case (R.id.action_signout):
                 AuthUI.getInstance().signOut(this)
@@ -189,11 +238,11 @@ public class AddEditActivity extends AppCompatActivity {
                                 // User is now signed out
                                 if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
                                     ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
-                                            .clearApplicationUserData(); // note: it has a return value!
+                                            .clearApplicationUserData();
                                 } else {
                                     // use old hacky way, which can be removed
                                     // once minSdkVersion goes above 19 in a few years.
-                                    Log.d(TAG, "onComplete: Application is pre kitkat.");
+                                    Log.d(TAG, "onComplete: Application is <kitkat.");
                                 }
                                 Intent intent = new Intent(AddEditActivity.this, MainActivity.class);
                                 startActivity(intent);

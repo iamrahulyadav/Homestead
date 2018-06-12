@@ -36,7 +36,7 @@ public abstract class FirebaseResolver {
 
                 String id = databaseJobs.push().getKey();
 
-                job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_CLAIMED ,isPrivate);
+                job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_CLAIMED , creatorId, isPrivate);
 
                 userRef.child(id).setValue(job);
                 Log.d(TAG, "insertJob: inserting " + job.toString());
@@ -78,7 +78,7 @@ public abstract class FirebaseResolver {
                                 .child(HomesteadsContract.NOTIFICATIONS);
 
                         String id = homesteadsJob.push().getKey();
-                        job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_OPEN, isPrivate);
+                        job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_OPEN, null, isPrivate);
                         homesteadsJob.child(id).setValue(job);
 
                         String notificationId = homesteadNotifications.push().getKey();
@@ -103,7 +103,7 @@ public abstract class FirebaseResolver {
         }
     }
 
-    static boolean updateJob(final String uid, final String name, final String description, final boolean isPrivate) {
+    static boolean updateJob(final String uid, final String name, final String description, int status, final String owner, final boolean isPrivate) {
 
         final DatabaseReference databaseJobs = FirebaseDatabase.getInstance().
                 getReference(JobsContract.ROOT_NODE);
@@ -116,10 +116,14 @@ public abstract class FirebaseResolver {
                         .child(userUid)
                         .child(UsersContract.JOBS_NODE);
 
-                job = new JobModel(uid, name, description, true);
+                job = new JobModel(uid, name, description, status, owner, true);
 
                 userRef.child(uid).child(JobsContract.NAME).setValue(job.getName());
                 userRef.child(uid).child(JobsContract.DESCRIPTION).setValue(job.getDescription());
+                Log.d(TAG, "updateJob: job.getStatus: " + job.getStatus());
+                userRef.child(uid).child(JobsContract.STATUS).setValue(job.getStatus());
+                userRef.child(uid).child(JobsContract.OWNER).setValue(job.getOwner());
+
                 Log.d(TAG, "updateJob: updating " + job.toString());
                 return true;
             }
@@ -133,9 +137,10 @@ public abstract class FirebaseResolver {
                         .child(CurrentUser.getHomesteadUid())
                         .child(HomesteadsContract.JOBS_NODE);
 
-                job = new JobModel(uid, name, description, false);
-                homesteadsJob.child(uid).child(JobsContract.NAME).setValue(job.getName());
-                homesteadsJob.child(uid).child(JobsContract.DESCRIPTION).setValue(job.getDescription());
+                homesteadsJob.child(uid).child(JobsContract.NAME).setValue(name);
+                homesteadsJob.child(uid).child(JobsContract.DESCRIPTION).setValue(description);
+                homesteadsJob.child(uid).child(JobsContract.STATUS).setValue(status);
+                homesteadsJob.child(uid).child(JobsContract.OWNER).setValue(owner);
 
                 return true;
             }
