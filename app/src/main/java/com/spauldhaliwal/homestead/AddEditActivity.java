@@ -1,7 +1,6 @@
 package com.spauldhaliwal.homestead;
 
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -32,7 +31,7 @@ import com.google.firebase.database.FirebaseDatabase;
 public class AddEditActivity extends AppCompatActivity {
     private static final String TAG = "AddEditActivity";
 
-    public enum editMode {ADD, EDIT}
+    public enum openMode {ADD, VIEW, AVAILABLE, CREATOR, OWNER}
 
     DatabaseReference jobsDatabseReference;
     DatabaseReference homesteadsDatabaseReerence;
@@ -44,7 +43,7 @@ public class AddEditActivity extends AppCompatActivity {
     static String jobOwner;
     static boolean jobScope;
 
-    private editMode mMode;
+    private openMode mMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +70,7 @@ public class AddEditActivity extends AppCompatActivity {
         KeyListener editDescriptionListener = editName.getKeyListener();
         editDescription.setKeyListener(editDescriptionListener);
 
-        final CheckBox claimTaskCheckBox = findViewById(R.id.claimTaskCheckBox);
+        final CheckBox claimCompleteTaskCheckBox = findViewById(R.id.claimTaskCheckBox);
         TextView claimTaskTextView = findViewById(R.id.claimTaskText);
 
         ImageButton saveButton = findViewById(R.id.editSaveButton);
@@ -81,46 +80,115 @@ public class AddEditActivity extends AppCompatActivity {
         final TextView privacyText = findViewById(R.id.privacyText);
 
         if (privacySwitch.isChecked()) {
-            privacyText.setText("Private");
+            privacyText.setText(JobsContract.PRIVATE);
         } else {
-            privacyText.setText("Public");
+            privacyText.setText(JobsContract.PRIVATE);
         }
 
         if (arguments != null) {
             Log.d(TAG, "onCreate: Previous job found. Retrieving job details");
             // retrieve task details
             job = (JobModel) arguments.getSerializable(JobsContract.ROOT_NODE);
+            KeyListener editNameKeyListener = editName.getKeyListener();
+            KeyListener editDescriptionKeyListener = editDescription.getKeyListener();
 
-            if (!job.getCreatorId().equals(CurrentUser.getUid())) {
+            if (job.getStatus() == JobsContract.STATUS_OPEN) {
+                //Job has not been claimed.
+                claimCompleteTaskCheckBox.setEnabled(true);
+                if (!job.getCreatorId().equals(CurrentUser.getUid())) {
+                    //User is not the creator of this job
+                    editName.setKeyListener(null);
+                    editDescription.setKeyListener(null);
+                    deleteButon.setVisibility(View.GONE);
+                    mMode = openMode.AVAILABLE;
+                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
+
+
+                }  else if (job.getCreatorId().equals(CurrentUser.getUid())) {
+                    // User is the creator of this job and it has not been claimed yet. Can still
+                    // be deleted/edited.
+                    editName.setKeyListener(editNameKeyListener);
+                    editDescription.setKeyListener(editDescriptionKeyListener);
+                    deleteButon.setVisibility(View.VISIBLE);
+                    mMode = openMode.CREATOR;
+                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
+
+                }
+
+            } else if (job.getStatus() == JobsContract.STATUS_CLAIMED){
+                //Job has been claimed.
+                claimCompleteTaskCheckBox.setEnabled(false);
+                deleteButon.setVisibility(View.GONE);
                 editName.setKeyListener(null);
                 editDescription.setKeyListener(null);
-//                saveButton.setVisibility(View.GONE);
+                saveButton.setVisibility(View.GONE);
+
+                if (!job.getCreatorId().equals(CurrentUser.getUid())
+                        && job.getOwner().equals(CurrentUser.getUid())) {
+                    //User is not the creator of this task but has claimed it.
+                    claimCompleteTaskCheckBox.setEnabled(true);
+                    claimTaskTextView.setText("Mark as complete");
+                    saveButton.setVisibility(View.VISIBLE);
+                    mMode = openMode.OWNER;
+                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
+
+                } else if (!job.getOwner().equals(CurrentUser.getUid())) {
+                    // User is not the claimant of this task.
+                    claimCompleteTaskCheckBox.setVisibility(View.GONE);
+                    claimTaskTextView.setText("Task has been claimed");
+                    mMode = openMode.VIEW;
+                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
+
+                }
+//                else if (job.getCreatorId().equals(CurrentUser.getUid())
+//                        && !job.getOwner().equals(CurrentUser.getUid())) {
+//                    //User is the creator of this job but not the claimant.
+//                    claimCompleteTaskCheckBox.setVisibility(View.GONE);
+//                    claimTaskTextView.setText("Task has been claimed.");
+//                    mMode = openMode.CREATOR;
+//}
+                else if (job.getOwner().equals(CurrentUser.getUid())) {
+                    //User is the creator of this job and the claimant.
+                    claimCompleteTaskCheckBox.setEnabled(true);
+                    saveButton.setVisibility(View.VISIBLE);
+                    claimTaskTextView.setText("Mark as complete");
+                    mMode = openMode.OWNER;
+                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
+                }
+            } else if (job.getStatus() == JobsContract.STATUS_CLOSED) {
+                // Task has been completed.
+                claimCompleteTaskCheckBox.setEnabled(false);
                 deleteButon.setVisibility(View.GONE);
+                editName.setKeyListener(null);
+                editDescription.setKeyListener(null);
+                saveButton.setVisibility(View.GONE);
+                claimCompleteTaskCheckBox.setVisibility(View.GONE);
+                claimTaskTextView.setText("Task has been completed");
+                mMode = openMode.VIEW;
+                Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
+
             }
+
             jobId = job.getId();
             jobScope = job.isIsPrivate();
             jobStatus = job.getStatus();
             Log.d(TAG, "onCreate: Job isPrivate: " + jobScope);
 
-            if (jobStatus != JobsContract.STATUS_OPEN) {
-                claimTaskCheckBox.setEnabled(false);
-            }
-
             editName.setText(job.getName());
             editDescription.setText(job.getDescription());
-            mMode = editMode.EDIT;
             privacySwitch.setVisibility(View.GONE);
             privacyText.setVisibility(View.GONE);
 
         } else {
+            job = null;
             Log.d(TAG, "onCreate: No previous job found. Creating new job");
 
             claimTaskTextView.setVisibility(View.GONE);
-            Log.d(TAG, "onCreate: claimTaskTextViewVisibility: " + claimTaskTextView.getVisibility()) ;
-            claimTaskCheckBox.setVisibility(View.GONE);
+            Log.d(TAG, "onCreate: claimTaskTextViewVisibility: " + claimTaskTextView.getVisibility());
+            claimCompleteTaskCheckBox.setVisibility(View.GONE);
             deleteButon.setVisibility(View.GONE);
             editName.requestFocus();
-            mMode = editMode.ADD;
+            mMode = openMode.ADD;
         }
 
 
@@ -156,6 +224,7 @@ public class AddEditActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Getting data from widgets instead of JobModel object in case edits are made.
                 String name = editName.getText().toString();
                 String description = editDescription.getText().toString();
 
@@ -172,13 +241,11 @@ public class AddEditActivity extends AppCompatActivity {
                             Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
                         }
                         break;
-                    case EDIT:
+
+                    case CREATOR:
                         Log.d(TAG, "Save Button onClick: EditMode is " + mMode);
-                        if (claimTaskCheckBox.isChecked()) {
-                            Log.d(TAG, "onClick: claimTaskCheckBox is " + claimTaskCheckBox.isChecked());
-                            int jobStatus = 1;
-                            Log.d(TAG, "onClick: jobStatusInput = " + jobStatus);
-                            jobOwner = CurrentUser.getUid();
+                        Log.d(TAG, "Checkbox onClick: jobOwner == " + job.getOwner());
+                        if (claimCompleteTaskCheckBox.isChecked() && job.getOwner() == null) {
 
                             if (FirebaseResolver.updateJob(jobId,
                                     name,
@@ -186,6 +253,7 @@ public class AddEditActivity extends AppCompatActivity {
                                     JobsContract.STATUS_CLAIMED,
                                     CurrentUser.getUid(),
                                     jobScope)) {
+                                Toast.makeText(AddEditActivity.this, "Task was claimed by the " + mMode, Toast.LENGTH_SHORT).show();
                                 finish();
                             } else {
                                 Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
@@ -198,12 +266,46 @@ public class AddEditActivity extends AppCompatActivity {
                                     jobStatus,
                                     jobOwner,
                                     jobScope)) {
+                                Toast.makeText(AddEditActivity.this, "Task was edited but not claimed", Toast.LENGTH_SHORT).show();
                                 finish();
                             } else {
                                 Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
                             }
                         }
                         break;
+
+                    case AVAILABLE:
+                        Log.d(TAG, "Save Button onClick: EditMode is: " + mMode);
+                        if (FirebaseResolver.updateJob(jobId,
+                                name,
+                                description,
+                                JobsContract.STATUS_CLAIMED,
+                                CurrentUser.getUid(),
+                                jobScope)) {
+                            finish();
+                        } else {
+                            Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
+                        }
+
+                    case VIEW:
+                        Log.d(TAG, "Save Button onClick: EditMode is: " + mMode + ". This should never happen," +
+                                " as the task is in " + mMode + " mode only and cannot be edited/claimed.");
+
+                    case OWNER:
+                        Log.d(TAG, "Save Button onClick: EditMode is: " + mMode);
+                        if (claimCompleteTaskCheckBox.isChecked()) {
+                            Log.d(TAG, "Save Button onClick: Current user is marking task as completed");
+
+                            FirebaseResolver.updateJob(jobId,
+                                    name,
+                                    description,
+                                    JobsContract.STATUS_CLOSED,
+                                    CurrentUser.getUid(),
+                                    jobScope);
+                            finish();
+
+                    }
+
                 }
             }
         });

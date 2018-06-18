@@ -1,5 +1,6 @@
 package com.spauldhaliwal.homestead;
 
+import android.graphics.Paint;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -33,6 +34,11 @@ class DatabaseRecyclerAdapter extends FirebaseRecyclerAdapter<JobModel, JobViewH
         holder.setName(model.getName());
         holder.setDescription(model.getDescription());
         holder.setCreatorIdImage(model.getCreatorIdImage());
+
+        if (model.getStatus() == JobsContract.STATUS_CLOSED) {
+            holder.name.setPaintFlags(holder.name.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.description.setPaintFlags(holder.description.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        }
     }
 
     @Override
@@ -70,10 +76,10 @@ class DatabaseRecyclerAdapter extends FirebaseRecyclerAdapter<JobModel, JobViewH
             Log.d(TAG, "setCreatorImage: description == " + description);
             Log.d(TAG, "setCreatorImage: == " + creatorIdImage);
 //            if (creatorIdImage != null) {
-                Glide.with(name.getContext())
-                        .load(Uri.parse(d))
-                        .apply(RequestOptions.circleCropTransform())
-                        .into(creatorIdImage);
+            Glide.with(name.getContext())
+                    .load(Uri.parse(d))
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(creatorIdImage);
 //            }
 
         }

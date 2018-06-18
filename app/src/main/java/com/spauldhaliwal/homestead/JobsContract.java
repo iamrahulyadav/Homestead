@@ -23,6 +23,8 @@ public class JobsContract {
     public static final String STATUS = "status";
     public static final String DESCRIPTION = "description";
 
+    public static final String PRIVATE = "Private";
+    public static final String PUBLIC = "Public";
 
 
     public static final int STATUS_OPEN = 0;
