@@ -57,8 +57,7 @@ public class HomeBoardFragment extends Fragment {
                 .child(HomesteadsContract.ROOT_NODE)
                 .child(CurrentUser.getHomesteadUid())
                 .child(HomesteadsContract.JOBS_NODE)
-                .orderByChild(JobsContract.STATUS);
-
+                .orderByChild(JobsContract.SORT_ORDER);
 
         FirebaseRecyclerOptions<JobModel> options =
                 new FirebaseRecyclerOptions.Builder<JobModel>()

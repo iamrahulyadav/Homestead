@@ -35,8 +35,9 @@ public abstract class FirebaseResolver {
                         .child(UsersContract.JOBS_NODE);
 
                 String id = databaseJobs.push().getKey();
+                String sortOrder = JobsContract.STATUS_CLAIMED + "_" + id;
 
-                job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_CLAIMED , creatorId, isPrivate);
+                job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_CLAIMED , creatorId, isPrivate, sortOrder);
 
                 userRef.child(id).setValue(job);
                 Log.d(TAG, "insertJob: inserting " + job.toString());
@@ -78,7 +79,8 @@ public abstract class FirebaseResolver {
                                 .child(HomesteadsContract.NOTIFICATIONS);
 
                         String id = homesteadsJob.push().getKey();
-                        job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_OPEN, null, isPrivate);
+                        String sortOrder = JobsContract.STATUS_OPEN + "_" + id;
+                        job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_OPEN, null, isPrivate, sortOrder);
                         homesteadsJob.child(id).setValue(job);
 
                         String notificationId = homesteadNotifications.push().getKey();
@@ -141,6 +143,11 @@ public abstract class FirebaseResolver {
                 homesteadsJob.child(uid).child(JobsContract.DESCRIPTION).setValue(description);
                 homesteadsJob.child(uid).child(JobsContract.STATUS).setValue(status);
                 homesteadsJob.child(uid).child(JobsContract.OWNER).setValue(owner);
+
+                if (status == JobsContract.STATUS_CLOSED) {
+                    String sortOrder = JobsContract.STATUS_CLOSED + "_" + uid;
+                    homesteadsJob.child(uid).child(JobsContract.SORT_ORDER).setValue(sortOrder);
+                }
 
                 return true;
             }

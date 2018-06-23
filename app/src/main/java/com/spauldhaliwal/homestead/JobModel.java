@@ -17,12 +17,13 @@ class JobModel implements Serializable {
     private String owner;
 //    private long dateAdded;
     private boolean isPrivate;
+    private String sortOrder;
 
 
     public JobModel() {
     }
 
-    public JobModel(String id, String name, String description, String creatorId, String creatorIdImage , int status, String owner ,boolean isPrivate) {
+    public JobModel(String id, String name, String description, String creatorId, String creatorIdImage , int status, String owner ,boolean isPrivate, String sortOrder) {
         this.id = id;
         this.name = name;
         this.creatorId = creatorId;
@@ -30,6 +31,7 @@ class JobModel implements Serializable {
         this.description = description;
 //        this.dateAdded = dateAdded;
         this.isPrivate = isPrivate;
+        this.sortOrder = sortOrder;
     }
 
     public JobModel(String id, String name, String description, int status, String owner, boolean isPrivate) {
@@ -74,6 +76,10 @@ class JobModel implements Serializable {
 
     public boolean isIsPrivate() {
         return isPrivate;
+    }
+
+    public String getSortOrder() {
+        return sortOrder;
     }
 
     @Override
