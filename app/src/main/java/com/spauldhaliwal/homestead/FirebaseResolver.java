@@ -1,9 +1,7 @@
 package com.spauldhaliwal.homestead;
 
-import android.net.wifi.hotspot2.pps.Credential;
 import android.util.Log;
 
-import com.firebase.ui.auth.data.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -220,6 +218,92 @@ public abstract class FirebaseResolver {
             Log.d(TAG, "sendMessage: sending" + messageModel.toString());
             return true;
         } else {
+            return false;
+        }
+    }
+
+    static boolean insertJobNote(final String jobId, final String creatorId, final String creatorImage, final String content,final boolean isPrivate) {
+
+        final DatabaseReference databaseJobs = FirebaseDatabase.getInstance().
+                getReference(JobsContract.ROOT_NODE);
+        if (isPrivate) {
+            if (content.length() > 0) {
+                DatabaseReference noteRef = FirebaseDatabase
+                        .getInstance()
+                        .getReference()
+                        .child(UsersContract.ROOT_NODE)
+                        .child(userUid)
+                        .child(UsersContract.JOBS_NODE)
+                        .child(jobId)
+                        .child(JobsContract.NOTES);
+
+                String id = databaseJobs.push().getKey();
+
+                JobNote jobNote = new JobNote(id,creatorId, creatorImage, content);
+
+                noteRef.child(id).setValue(jobNote);
+                Log.d(TAG, "insertJobNote: inserting " + jobNote.toString());
+
+                return true;
+            }
+            return false;
+
+        } else {
+            if (content.length() > 0) {
+                // Retrieve current user's node in /Users
+                //
+                DatabaseReference userHomesteadRef = FirebaseDatabase
+                        .getInstance()
+                        .getReference()
+                        .child(UsersContract.ROOT_NODE)
+                        .child(userUid)
+                        .child(UsersContract.HOMESTEAD_ID);
+
+                // Event listener to read the user's data
+                userHomesteadRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        //Retrieve user's homesteadId
+                        String userHomesteadId = (String) dataSnapshot.getValue();
+                        Log.d(TAG, "onDataChange: userHomesteadid is " + userHomesteadId);
+
+                        //Reference homestead's Job node for insertion
+                        DatabaseReference homesteadsJobNote = FirebaseDatabase
+                                .getInstance()
+                                .getReference(HomesteadsContract.ROOT_NODE)
+                                .child(userHomesteadId)
+                                .child(HomesteadsContract.JOBS_NODE)
+                                .child(jobId)
+                                .child(JobsContract.NOTES);
+
+//                        DatabaseReference homesteadNotifications = FirebaseDatabase
+//                                .getInstance()
+//                                .getReference(HomesteadsContract.ROOT_NODE)
+//                                .child(CurrentUser.getHomesteadUid())
+//                                .child(HomesteadsContract.NOTIFICATIONS);
+
+                        String id = homesteadsJobNote.push().getKey();
+                        JobNote jobNote = new JobNote(id,creatorId, creatorImage, content);
+                        homesteadsJobNote.child(id).setValue(jobNote);
+
+//                        String notificationId = homesteadNotifications.push().getKey();
+//                        NotificationModel notificationModel = new NotificationModel(CurrentUser.getName(),
+//                                name,
+//                                description,
+//                                notificationId,
+//                                creatorId,
+//                                JobsContract.TYPE);
+//
+//                        homesteadNotifications.child(notificationId).setValue(notificationModel);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                return true;
+            }
             return false;
         }
     }

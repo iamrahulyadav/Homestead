@@ -31,7 +31,7 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
+    private static final String TAG = "ChatAdapter";
 //    FirebaseRecyclerAdapter adapter;
     RecyclerView recyclerView;
 
@@ -71,6 +71,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
+        Log.d(TAG, "getItemViewType: ChatAdapter being used");
 
         MessageModel model = (MessageModel) this.getItem(position);
 
@@ -200,7 +201,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    emojisOnly.setPadding(16, 0, 0, 0);
 //                    emojisOnly.setBackgroundColor(80000000);
 //                } else {
-//                    ((IncomingMessageHolder) holder).setMessage(model.getMessage());
+//                    ((IncomingMessageHolder) holder).setContent(model.getMessage());
 //                }
                 break;
             case VIEW_TYPE_MESSAGE_INCOMING_ISOLATED:
@@ -220,7 +221,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    emojisOnly.setPadding(16, 0, 0, 0);
 //                    emojisOnly.setBackgroundColor(80000000);
 //                } else {
-//                    ((IncomingMessageHolder) holder).setMessage(model.getMessage());
+//                    ((IncomingMessageHolder) holder).setContent(model.getMessage());
 //                }
                 break;
             case VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST_FINAL:
@@ -240,7 +241,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    emojisOnly.setPadding(16, 0, 0, 0);
 //                    emojisOnly.setBackgroundColor(80000000);
 //                } else {
-//                    ((IncomingMessageHolder) holder).setMessage(model.getMessage());
+//                    ((IncomingMessageHolder) holder).setContent(model.getMessage());
 //                }
                 break;
             case VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST:
@@ -259,7 +260,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    emojisOnly.setPadding(16, 0, 0, 0);
 //                    emojisOnly.setBackgroundColor(80000000);
 //                } else {
-//                    ((IncomingMessageHolder) holder).setMessage(model.getMessage());
+//                    ((IncomingMessageHolder) holder).setContent(model.getMessage());
 //                }
                 break;
             case VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_SURROUNDED:
@@ -278,7 +279,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    emojisOnly.setPadding(16, 0, 0, 0);
 //                    emojisOnly.setBackgroundColor(80000000);
 //                } else {
-//                    ((IncomingMessageHolder) holder).setMessage(model.getMessage());
+//                    ((IncomingMessageHolder) holder).setContent(model.getMessage());
 //                }
                 break;
             case VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER:
@@ -297,7 +298,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    emojisOnly.setPadding(16, 0, 0, 0);
 //                    emojisOnly.setBackgroundColor(80000000);
 //                } else {
-//                    ((IncomingMessageHolder) holder).setMessage(model.getMessage());
+//                    ((IncomingMessageHolder) holder).setContent(model.getMessage());
 //                }
                 break;
             case VIEW_TYPE_MESSAGE_INCOMING:
@@ -316,7 +317,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    emojisOnly.setPadding(16, 0, 0, 0);
 //                    emojisOnly.setBackgroundColor(80000000);
 //                } else {
-//                    ((IncomingMessageHolder) holder).setMessage(model.getMessage());
+//                    ((IncomingMessageHolder) holder).setContent(model.getMessage());
 //                }
                 break;
             case VIEW_TYPE_MESSAGE_OUTGOING:
@@ -334,7 +335,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    emojisOnly.setPadding(0, 0, 16, 0);
 //                    emojisOnly.setBackgroundColor(80000000);
 //                } else {
-//                    ((OutgoingMessageHolder) holder).setMessage(model.getMessage());
+//                    ((OutgoingMessageHolder) holder).setContent(model.getMessage());
 //                }
 
                 break;
@@ -352,7 +353,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    emojisOnly.setPadding(0, 0, 16, 0);
 //                    emojisOnly.setBackgroundColor(80000000);
 //                } else {
-//                    ((OutgoingMessageHolder) holder).setMessage(model.getMessage());
+//                    ((OutgoingMessageHolder) holder).setContent(model.getMessage());
 //                }
                 break;
 

@@ -1,6 +1,7 @@
 package com.spauldhaliwal.homestead;
 
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -8,6 +9,8 @@ import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.method.KeyListener;
 import android.util.Log;
@@ -15,6 +18,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -25,8 +29,15 @@ import android.widget.Toast;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddEditActivity extends AppCompatActivity {
     private static final String TAG = "AddEditActivity";
@@ -37,6 +48,13 @@ public class AddEditActivity extends AppCompatActivity {
     DatabaseReference homesteadsDatabaseReerence;
     Vibrator vibe;
 
+    RecyclerView jobNoteRecyclerView;
+    JobNotesRecyclerAdapter jobNotesRecyclerAdapter;
+    private LinearLayoutManager linearLayoutManager;
+
+    private final List<JobNote> notesList = new ArrayList<>();
+
+
 
     static String jobId;
     static int jobStatus;
@@ -45,11 +63,13 @@ public class AddEditActivity extends AppCompatActivity {
 
     private openMode mMode;
 
+    Dialog addNoteDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        setContentView(R.layout.activity_add_edit);
+        setContentView(R.layout.task_details);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
@@ -76,8 +96,19 @@ public class AddEditActivity extends AppCompatActivity {
         ImageButton saveButton = findViewById(R.id.editSaveButton);
         ImageButton deleteButon = findViewById(R.id.editDeleteButton);
 
+        final Button addNoteButton = findViewById(R.id.addNoteButton);
+
         final Switch privacySwitch = findViewById(R.id.privacySwitch);
         final TextView privacyText = findViewById(R.id.privacyText);
+
+        jobNoteRecyclerView = findViewById(R.id.notesRecyclerView);
+        jobNotesRecyclerAdapter = new JobNotesRecyclerAdapter(notesList);
+        linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
+        jobNoteRecyclerView.setLayoutManager(linearLayoutManager);
+
+        jobNoteRecyclerView.setAdapter(jobNotesRecyclerAdapter);
 
         if (privacySwitch.isChecked()) {
             privacyText.setText(JobsContract.PRIVATE);
@@ -178,6 +209,8 @@ public class AddEditActivity extends AppCompatActivity {
             editDescription.setText(job.getDescription());
             privacySwitch.setVisibility(View.GONE);
             privacyText.setVisibility(View.GONE);
+            loadNotes();
+            Log.d(TAG, "notesLists: " + notesList.toString());
 
         } else {
             job = null;
@@ -188,6 +221,7 @@ public class AddEditActivity extends AppCompatActivity {
             claimCompleteTaskCheckBox.setVisibility(View.GONE);
             deleteButon.setVisibility(View.GONE);
             editName.requestFocus();
+            addNoteButton.setEnabled(false);
             mMode = openMode.ADD;
         }
 
@@ -318,6 +352,75 @@ public class AddEditActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        addNoteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addNoteDialog = new Dialog(AddEditActivity.this);
+                addNoteDialog.setContentView(R.layout.add_note_dialog);
+                addNoteDialog.show();
+
+                Button addNoteSaveButton = addNoteDialog.findViewById(R.id.addNoteSaveButton);
+                final EditText addNoteText = addNoteDialog.findViewById(R.id.addNoteEditText);
+
+                addNoteSaveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        FirebaseResolver.insertJobNote(job.getId(),
+                                CurrentUser.getUid(),
+                                CurrentUser.getProfileImage(),
+                                addNoteText.getText().toString(),
+                                jobScope);
+                        addNoteDialog.dismiss();
+                    }
+                });
+            }
+        });
+    }
+
+    private void loadNotes() {
+        DatabaseReference messageRef = FirebaseDatabase.getInstance()
+                .getReference(HomesteadsContract.ROOT_NODE)
+                .child(CurrentUser.getHomesteadUid())
+                .child(HomesteadsContract.JOBS_NODE)
+                .child(jobId)
+                .child(JobsContract.NOTES);
+
+        Query messageQuery = messageRef.limitToLast(50);
+
+        ChildEventListener childEventListener = messageQuery.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                JobNote jobNote = dataSnapshot.getValue(JobNote.class);
+
+                notesList.add(jobNote);
+                Log.d(TAG, "onChildAdded: " + jobNote.toString());
+                Log.d(TAG, "onChildAdded: notesLit: "+ notesList.toString());
+                jobNotesRecyclerAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+
     }
 
     @Override

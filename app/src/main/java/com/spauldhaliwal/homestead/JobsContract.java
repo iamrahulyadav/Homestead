@@ -22,6 +22,7 @@ public class JobsContract {
     public static final String CREATOR = "creator";
     public static final String STATUS = "status";
     public static final String DESCRIPTION = "description";
+    public static final String NOTES = "notes";
 
     public static final String PRIVATE = "Private";
     public static final String PUBLIC = "Public";

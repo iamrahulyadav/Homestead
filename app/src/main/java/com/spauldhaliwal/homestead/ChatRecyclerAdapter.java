@@ -516,7 +516,7 @@ public class ChatRecyclerAdapter extends FirebaseRecyclerAdapter<MessageModel, R
             message.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    final ChatRecyclerAdapter.MessageHolder holder = (ChatRecyclerAdapter.MessageHolder) recyclerView
+//                    final JobNotesRecyclerAdapter.MessageHolder holder = (JobNotesRecyclerAdapter.MessageHolder) recyclerView
 //                            .findViewHolderForAdapterPosition(position);
 //
 //                    MessageModel message = (MessageModel) this.getItem(position);

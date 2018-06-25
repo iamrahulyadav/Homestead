@@ -95,4 +95,5 @@ class JobModel implements Serializable {
                 ", isPrivate=" + isPrivate +
                 '}';
     }
+
 }
