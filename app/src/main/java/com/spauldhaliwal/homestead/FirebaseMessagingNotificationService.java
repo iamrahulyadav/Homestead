@@ -30,7 +30,8 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
         super.onMessageReceived(remoteMessage);
-        Log.d("msg", "onMessageReceived: " + remoteMessage.getData().toString());
+        Log.d("msg", "onMessageReceived: " + remoteMessage.getData().toString() + CurrentUser.getUid());
+
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -41,6 +42,7 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
 
         String notificationType = notificationData.get("type").toString();
         String notificationSender = notificationData.get("sender").toString();
+        String notificationSenderUid = notificationData.get("sender_uid").toString();
         String notificationBody = notificationData.get("body").toString();
 
 
@@ -51,52 +53,55 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
         String GROUP_KEY_JOBS = "com.spauldhaliwal.homestead.JOB_NOTIFICATION";
 
         String channelId;
+        if (!notificationSenderUid.equals(CurrentUser.getUid())) {
+            //only send in-app notifications if the senderUid and currentUserUid are not the same
+            if (notificationType.equals(MessagesContract.TYPE)) {
+                channelId = "Chat Notification";
 
-        if (notificationType.equals(MessagesContract.TYPE)) {
-            channelId = "Chat Notification";
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle(notificationSender + ": ")
+                        .setContentText(notificationBody)
+                        .setAutoCancel(true)
+                        .setContentIntent(pendingIntent)
+                        .setDefaults(DEFAULT_SOUND | DEFAULT_VIBRATE)
+                        .setGroup(GROUP_KEY_CHAT)
+                        .setPriority(NotificationCompat.PRIORITY_MAX);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(notificationSender + ": ")
-                    .setContentText(notificationBody)
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent)
-                    .setDefaults(DEFAULT_SOUND | DEFAULT_VIBRATE)
-                    .setGroup(GROUP_KEY_CHAT)
-                    .setPriority(NotificationCompat.PRIORITY_MAX);
+                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel channel = new NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_HIGH);
+                    manager.createNotificationChannel(channel);
+                }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = new NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_HIGH);
-                manager.createNotificationChannel(channel);
+                manager.notify((int) System.currentTimeMillis(), builder.build());
+
+            } else if (notificationType.equals(JobsContract.TYPE)) {
+
+                channelId = "New Jobs Notification";
+                String jobNotificationTitle = notificationData.get("jobTitle").toString();
+                String jobNotificationDescription = notificationData.get("jobDescription").toString();
+
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("New job added by " + notificationSender + ": " + jobNotificationTitle)
+                        .setContentText(jobNotificationDescription)
+                        .setAutoCancel(true)
+                        .setContentIntent(pendingIntent)
+                        .setGroup(GROUP_KEY_JOBS)
+                        .setPriority(NotificationCompat.PRIORITY_MAX);
+
+                NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel channel = new NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_HIGH);
+                    manager.createNotificationChannel(channel);
+                }
+
+                manager.notify((int) System.currentTimeMillis(), builder.build());
             }
 
-            manager.notify((int) System.currentTimeMillis(), builder.build());
-
-        } else if (notificationType.equals(JobsContract.TYPE)) {
-
-            channelId = "New Jobs Notification";
-            String jobNotificationTitle = notificationData.get("jobTitle").toString();
-            String jobNotificationDescription = notificationData.get("jobDescription").toString();
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle("New job added by " + notificationSender + ": " + jobNotificationTitle)
-                    .setContentText(jobNotificationDescription)
-                    .setAutoCancel(true)
-                    .setContentIntent(pendingIntent)
-                    .setGroup(GROUP_KEY_JOBS)
-                    .setPriority(NotificationCompat.PRIORITY_MAX);
-
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = new NotificationChannel(channelId, channelId, NotificationManager.IMPORTANCE_HIGH);
-                manager.createNotificationChannel(channel);
-            }
-
-            manager.notify((int) System.currentTimeMillis(), builder.build());
         }
 
 
