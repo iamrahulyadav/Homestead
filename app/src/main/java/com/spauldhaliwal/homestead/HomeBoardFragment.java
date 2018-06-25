@@ -31,7 +31,6 @@ public class HomeBoardFragment extends Fragment {
 
     DatabaseRecyclerAdapter firebaseAdapter;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    private static final String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
     @Nullable
     @Override

@@ -35,10 +35,29 @@ class DatabaseRecyclerAdapter extends FirebaseRecyclerAdapter<JobModel, JobViewH
         holder.setDescription(model.getDescription());
         holder.setCreatorIdImage(model.getCreatorIdImage());
 
-        if (model.getStatus() == JobsContract.STATUS_CLOSED) {
+        if (holder.getItemViewType() == JobsContract.STATUS_CLOSED) {
             holder.name.setPaintFlags(holder.name.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             holder.description.setPaintFlags(holder.description.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
+
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        JobModel jobModel = getItem(position);
+        int jobStatus = jobModel.getStatus();
+
+        if (jobStatus == JobsContract.STATUS_OPEN) {
+            return JobsContract.STATUS_OPEN;
+        } else if (jobStatus == JobsContract.STATUS_CLAIMED) {
+            return JobsContract.STATUS_CLAIMED;
+        } else if (jobStatus == JobsContract.STATUS_CLOSED) {
+            return JobsContract.STATUS_CLOSED;
+        } else {
+            return -1;
+        }
+
+
     }
 
     @Override

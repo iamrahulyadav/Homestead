@@ -195,6 +195,7 @@ public class AddEditActivity extends AppCompatActivity {
                 saveButton.setVisibility(View.GONE);
                 claimCompleteTaskCheckBox.setVisibility(View.GONE);
                 claimTaskTextView.setText("Task has been completed");
+                addNoteButton.setEnabled(false);
                 mMode = openMode.VIEW;
                 Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
 
