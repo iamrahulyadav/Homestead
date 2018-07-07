@@ -3,6 +3,7 @@ package com.spauldhaliwal.homestead;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -24,6 +25,7 @@ import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,10 +37,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
-
 import java.util.Arrays;
+
+import static com.facebook.internal.CallbackManagerImpl.RequestCodeOffset.AppInvite;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,6 +64,40 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity onCreate: starts");
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
+            @Override
+            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                Uri deepLink = null;
+                if (pendingDynamicLinkData != null) {
+                    Intent intent = getIntent();
+                    String action = intent.getAction();
+                    Uri uri = intent.getData();
+                    Log.d(TAG, "GetQuery: " + uri.getQueryParameter("homesteadid"));
+
+                    Log.d(TAG, "GetQuery: " + action + " and Uri: "  + uri);
+
+
+                    deepLink = pendingDynamicLinkData.getLink();
+                    Log.d(TAG, "GetQuery: " + deepLink.getQueryParameter("apn"));
+
+
+                    Log.d(TAG, "GetQuery: " + pendingDynamicLinkData.toString());
+                    Log.d(TAG, "GetQuery:" + deepLink + " and Q: " + deepLink.getQuery());
+                    Log.d(TAG, "GetQuery: " + pendingDynamicLinkData.zzcbj().toString());
+
+                }
+
+
+            }
+
+        }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "getDynamicLink onFailure: " + e);
+            }
+        });
+
 
         final FirebaseAuth auth = FirebaseAuth.getInstance();
 
@@ -227,7 +268,38 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                 return true;
+            case (R.id.menuInvite):
+                String homesteadId = CurrentUser.getHomesteadUid();
+                Task<ShortDynamicLink> dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
+                        .setLink(Uri.parse("https://homesteadapp.com/?homesteadid=" + homesteadId))
+                        .setDynamicLinkDomain("homesteadapp.page.link")
+                        // Open links with this app on android
+                        .setAndroidParameters(new DynamicLink.AndroidParameters.Builder().build())
+                        // Open links with this app on iOS
+                        .setIosParameters(new DynamicLink.IosParameters
+                                .Builder("com.spauldhaliwal.homestead").build())
+                        .buildShortDynamicLink().addOnCompleteListener(this, new OnCompleteListener<ShortDynamicLink>() {
+                            @Override
+                            public void onComplete(@NonNull Task<ShortDynamicLink> task) {
+                                if (task.isSuccessful()) {
+                                    // Short Link created
+                                    Uri shortDynamicLinkUri = task.getResult().getShortLink();
+                                    Uri flowchartLink = task.getResult().getPreviewLink();
+
+                                    Log.d(TAG, "onOptionsItemSelected: inviteUri: " + shortDynamicLinkUri);
+                                } else {
+                                    // Error
+                                    // ...
+                                }
+
+                            }
+                        });
+
+
+
+                return true;
             case (R.id.menuChatItem):
+
                 Intent intent = new Intent(this, ChatActivity.class);
                 startActivity(intent);
                 return true;

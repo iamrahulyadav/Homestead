@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.spauldhaliwal.homestead.MainActivity">
     <item
+        android:id="@+id/menuInvite"
+        android:title="Invite"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_signout"
         android:orderInCategory="100"
         android:title="Sign Out"

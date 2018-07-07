@@ -2,9 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.spauldhaliwal.homestead">
 
-    <uses-permission
-        android:name="android.permission.VIBRATE">
-    </uses-permission>
+    <uses-permission android:name="android.permission.VIBRATE"></uses-permission>
 
     <application
         android:name=".HomesteadApp"
@@ -20,7 +18,22 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
 
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="homesteadapp.com"
+                    android:scheme="http" />
+                <data
+                    android:host="homesteadapp.com"
+                    android:scheme="https" />
+
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -32,18 +45,18 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name=".ChatActivity"
+        <activity
+            android:name=".ChatActivity"
             android:label="Homestead"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
-                <action android:name="anroid.intent.action.MAIN"/>
+                <action android:name="anroid.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".FirebaseMessagingNotificationService">
+        <service android:name=".FirebaseMessagingNotificationService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
@@ -53,11 +66,11 @@
             android:exported="false" />
 
         <!--<activity android:name=".SignIn">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
+        <!--<intent-filter>-->
+        <!--<action android:name="android.intent.action.MAIN" />-->
 
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
+        <!--<category android:name="android.intent.category.LAUNCHER" />-->
+        <!--</intent-filter>-->
         <!--</activity>-->
     </application>
 
