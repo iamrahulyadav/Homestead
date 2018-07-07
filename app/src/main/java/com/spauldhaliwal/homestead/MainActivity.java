@@ -43,6 +43,7 @@ import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
+
 import java.util.Arrays;
 
 import static com.facebook.internal.CallbackManagerImpl.RequestCodeOffset.AppInvite;
@@ -73,9 +74,10 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = getIntent();
                     String action = intent.getAction();
                     Uri uri = intent.getData();
-                    Log.d(TAG, "GetQuery: " + uri.getQueryParameter("homesteadid"));
+                    Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
+                    Log.d(TAG, "GetQuery: User ID = " + uri.getQueryParameter("userid"));
 
-                    Log.d(TAG, "GetQuery: " + action + " and Uri: "  + uri);
+                    Log.d(TAG, "GetQuery: " + action + " and Uri: " + uri);
 
 
                     deepLink = pendingDynamicLinkData.getLink();
@@ -108,29 +110,35 @@ public class MainActivity extends AppCompatActivity {
             CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
                 @Override
                 public void onSuccess() {
-                    setContentView(R.layout.activity_main);
-                    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-                    toolbar.setSubtitleTextColor(616161);
-                    setSupportActionBar(toolbar);
 
-                    FloatingActionButton fab = findViewById(R.id.fab);
+                    if (CurrentUser.getHomesteadUid() != null) {
+                        setContentView(R.layout.activity_main);
+                        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                        toolbar.setSubtitleTextColor(616161);
+                        setSupportActionBar(toolbar);
 
-                    fab.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(MainActivity.this, AddEditActivity.class);
-                            startActivity(intent);
-                        }
-                    });
+                        FloatingActionButton fab = findViewById(R.id.fab);
 
-                    mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
+                        fab.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(MainActivity.this, AddEditActivity.class);
+                                startActivity(intent);
+                            }
+                        });
 
-                    // ViewPager and its adapters use support library fragments,
-                    // so use getSupportFragmentManager.
-                    mViewPager = findViewById(R.id.content_pager);
+                        mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
 
-                    mViewPager.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
+                        // ViewPager and its adapters use support library fragments,
+                        // so use getSupportFragmentManager.
+                        mViewPager = findViewById(R.id.content_pager);
+
+                        mViewPager.setAdapter(mAdapter);
+                        mAdapter.notifyDataSetChanged();
+                    } else {
+                        Log.d(TAG, "onSuccess: User does not belong to any homestead");
+                    }
+
                 }
             });
 
@@ -166,6 +174,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                             // User already has an account
+
+
                             Log.d(TAG, "onDataChange: dataSnapshot == " + dataSnapshot);
 
                             ref.child(user.getUid())
@@ -203,11 +213,9 @@ public class MainActivity extends AppCompatActivity {
                                 public void onSuccess() {
                                     Intent intent = new Intent(MainActivity.this, MainActivity.class);
                                     startActivity(intent);
-
                                     finish();
                                 }
                             });
-
                         }
                     }
 
@@ -269,9 +277,10 @@ public class MainActivity extends AppCompatActivity {
                         });
                 return true;
             case (R.id.menuInvite):
+                String userId = CurrentUser.getUid();
                 String homesteadId = CurrentUser.getHomesteadUid();
                 Task<ShortDynamicLink> dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
-                        .setLink(Uri.parse("https://homesteadapp.com/?homesteadid=" + homesteadId))
+                        .setLink(Uri.parse("https://homesteadapp.com/?homesteadid=" + homesteadId + "&userid=" + userId))
                         .setDynamicLinkDomain("homesteadapp.page.link")
                         // Open links with this app on android
                         .setAndroidParameters(new DynamicLink.AndroidParameters.Builder().build())
@@ -294,8 +303,6 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         });
-
-
 
                 return true;
             case (R.id.menuChatItem):
