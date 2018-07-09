@@ -1,7 +1,10 @@
 package com.spauldhaliwal.homestead;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,7 +38,7 @@ public abstract class FirebaseResolver {
                 String id = databaseJobs.push().getKey();
                 String sortOrder = JobsContract.STATUS_CLAIMED + "_" + id;
 
-                job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_CLAIMED , creatorId, isPrivate, sortOrder);
+                job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_CLAIMED, creatorId, isPrivate, sortOrder);
 
                 userRef.child(id).setValue(job);
                 Log.d(TAG, "insertJob: inserting " + job.toString());
@@ -222,7 +225,7 @@ public abstract class FirebaseResolver {
         }
     }
 
-    static boolean insertJobNote(final String jobId, final String creatorId, final String creatorImage, final String content,final boolean isPrivate) {
+    static boolean insertJobNote(final String jobId, final String creatorId, final String creatorImage, final String content, final boolean isPrivate) {
 
         final DatabaseReference databaseJobs = FirebaseDatabase.getInstance().
                 getReference(JobsContract.ROOT_NODE);
@@ -239,7 +242,7 @@ public abstract class FirebaseResolver {
 
                 String id = databaseJobs.push().getKey();
 
-                JobNote jobNote = new JobNote(id,creatorId, creatorImage, content);
+                JobNote jobNote = new JobNote(id, creatorId, creatorImage, content);
 
                 noteRef.child(id).setValue(jobNote);
                 Log.d(TAG, "insertJobNote: inserting " + jobNote.toString());
@@ -283,7 +286,7 @@ public abstract class FirebaseResolver {
 //                                .child(HomesteadsContract.NOTIFICATIONS);
 
                         String id = homesteadsJobNote.push().getKey();
-                        JobNote jobNote = new JobNote(id,creatorId, creatorImage, content);
+                        JobNote jobNote = new JobNote(id, creatorId, creatorImage, content);
                         homesteadsJobNote.child(id).setValue(jobNote);
 
 //                        String notificationId = homesteadNotifications.push().getKey();
@@ -306,6 +309,43 @@ public abstract class FirebaseResolver {
             }
             return false;
         }
+    }
+
+    static boolean createHomestead(String name) {
+        if (name.length() > 0) {
+            DatabaseReference homesteadsRef = FirebaseDatabase
+                    .getInstance()
+                    .getReference(HomesteadsContract.ROOT_NODE);
+
+            String homesteadId = homesteadsRef.push().getKey();
+
+            HomesteadModel newHomestead = new HomesteadModel(homesteadId, name);
+            homesteadsRef.child(homesteadId).setValue(newHomestead);
+
+            DatabaseReference userRef = FirebaseDatabase
+                    .getInstance()
+                    .getReference()
+                    .child(UsersContract.ROOT_NODE)
+                    .child(userUid);
+
+            userRef.child(UsersContract.HOMESTEAD_ID).setValue(homesteadId);
+            return true;
+
+        } else {
+            return false;
+        }
+    }
+
+    static void leaveHomestead() {
+
+        DatabaseReference userRef = FirebaseDatabase
+                .getInstance()
+                .getReference()
+                .child(UsersContract.ROOT_NODE)
+                .child(userUid);
+
+       userRef.child(UsersContract.HOMESTEAD_ID).removeValue();
+
     }
 
 }

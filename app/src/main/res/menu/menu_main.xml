@@ -16,4 +16,8 @@
         android:icon="?android:attr/listChoiceIndicatorSingle"
         android:title="Chat"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menuLeaveHomestead"
+        android:title="Leave Homestead"
+        app:showAsAction="never" />
 </menu>

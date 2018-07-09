@@ -8,7 +8,6 @@ public class HomesteadModel {
 
     private String uId;
     private String name;
-    private String[] users;
 
     public HomesteadModel() {
     }
@@ -26,7 +25,4 @@ public class HomesteadModel {
         return name;
     }
 
-    public String[] getUsers() {
-        return users;
-    }
 }

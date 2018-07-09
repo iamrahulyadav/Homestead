@@ -32,6 +32,16 @@ class UserModel implements Serializable {
         this.notifications = notifications;
     }
 
+    public UserModel(String uid, String tokenId, String name, String email, String profileImage, String jobs, String notifications) {
+        this.uid = uid;
+        this.tokenId = tokenId;
+        this.name = name;
+        this.email = email;
+        this.profileImage = profileImage;
+        this.jobs = jobs;
+        this.notifications = notifications;
+    }
+
     public String getUid() {
         return uid;
     }

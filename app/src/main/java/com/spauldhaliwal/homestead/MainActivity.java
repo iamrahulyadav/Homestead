@@ -2,6 +2,7 @@ package com.spauldhaliwal.homestead;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -10,6 +11,7 @@ import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -59,46 +61,15 @@ public class MainActivity extends AppCompatActivity {
     // representing an object in the collection.
     ViewPager mViewPager;
     HomeBoardPagerAdapter mAdapter;
-    private static final int RC_SIGN_IN = 123;
+    public static final int RC_SIGN_IN = 1;
+    public static final int CREATE_HOMESTEAD_REQUEST = 2;
+
+    String homesteadInviteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity onCreate: starts");
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-
-        FirebaseDynamicLinks.getInstance().getDynamicLink(getIntent()).addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
-            @Override
-            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                Uri deepLink = null;
-                if (pendingDynamicLinkData != null) {
-                    Intent intent = getIntent();
-                    String action = intent.getAction();
-                    Uri uri = intent.getData();
-                    Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
-                    Log.d(TAG, "GetQuery: User ID = " + uri.getQueryParameter("userid"));
-
-                    Log.d(TAG, "GetQuery: " + action + " and Uri: " + uri);
-
-
-                    deepLink = pendingDynamicLinkData.getLink();
-                    Log.d(TAG, "GetQuery: " + deepLink.getQueryParameter("apn"));
-
-
-                    Log.d(TAG, "GetQuery: " + pendingDynamicLinkData.toString());
-                    Log.d(TAG, "GetQuery:" + deepLink + " and Q: " + deepLink.getQuery());
-                    Log.d(TAG, "GetQuery: " + pendingDynamicLinkData.zzcbj().toString());
-
-                }
-
-
-            }
-
-        }).addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(TAG, "getDynamicLink onFailure: " + e);
-            }
-        });
 
 
         final FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -106,12 +77,14 @@ public class MainActivity extends AppCompatActivity {
         if (auth.getCurrentUser() != null) {
             // User is already signed in
             Log.d(TAG, "onCreate: already signed in");
+            Log.d(TAG, "onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
 
             CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
                 @Override
                 public void onSuccess() {
 
                     if (CurrentUser.getHomesteadUid() != null) {
+                        // User belongs to a homestead.
                         setContentView(R.layout.activity_main);
                         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
                         toolbar.setSubtitleTextColor(616161);
@@ -136,9 +109,45 @@ public class MainActivity extends AppCompatActivity {
                         mViewPager.setAdapter(mAdapter);
                         mAdapter.notifyDataSetChanged();
                     } else {
-                        Log.d(TAG, "onSuccess: User does not belong to any homestead");
-                    }
+                        // User does not belong to a homestead
+                        Log.d(TAG, "onSuccess: User does not belong to a homestead");
 
+                        FirebaseDynamicLinks.getInstance()
+                                .getDynamicLink(getIntent())
+                                .addOnSuccessListener(MainActivity.this,
+                                        new OnSuccessListener<PendingDynamicLinkData>() {
+
+                                            @Override
+                                            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                                                // Retrieve homestead invite id if it exists.
+                                                Uri deepLink = null;
+                                                if (pendingDynamicLinkData != null) {
+                                                    Intent intent = getIntent();
+                                                    Uri uri = intent.getData();
+                                                    String homesteadInviteId = uri.getQueryParameter("homesteadid");
+                                                    Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
+
+                                                    Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
+                                                    createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
+                                                    startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+                                                } else {
+                                                    Log.d(TAG, "onSuccess: Homestead invite id does not exist");
+                                                    Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
+                                                    startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+                                                }
+                                            }
+
+                                        }).addOnFailureListener(MainActivity.this, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+
+                                Log.d(TAG, "getDynamicLink onFailure: " + e);
+                                Toast.makeText(MainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                                startActivity(intent);
+                            }
+                        });
+                    }
                 }
             });
 
@@ -175,24 +184,63 @@ public class MainActivity extends AppCompatActivity {
                         if (dataSnapshot.exists()) {
                             // User already has an account
 
-
                             Log.d(TAG, "onDataChange: dataSnapshot == " + dataSnapshot);
 
-                            ref.child(user.getUid())
-                                    .child(UsersContract.TOKEN_ID)
-                                    .setValue(FirebaseInstanceId.getInstance().getToken());
+                            if (dataSnapshot.hasChild(UsersContract.HOMESTEAD_ID)) {
+                                //User has a homesteadId
+                                ref.child(user.getUid())
+                                        .child(UsersContract.TOKEN_ID)
+                                        .setValue(FirebaseInstanceId.getInstance().getToken());
 
-                            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
-                                @Override
-                                public void onSuccess() {
-                                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                    finish();
+                                CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
+                                    @Override
+                                    public void onSuccess() {
+                                        Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
 
-                                    FirebaseMessaging.getInstance()
-                                            .subscribeToTopic(CurrentUser.getHomesteadUid() + HomesteadsContract.NOTIFICATIONS);
-                                }
-                            });
+                                        FirebaseMessaging.getInstance()
+                                                .subscribeToTopic(CurrentUser.getHomesteadUid() + HomesteadsContract.NOTIFICATIONS);
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(MainActivity.this, "User does not belong to any homestead.", Toast.LENGTH_LONG).show();
+                                FirebaseDynamicLinks.getInstance()
+                                        .getDynamicLink(getIntent())
+                                        .addOnSuccessListener(MainActivity.this,
+                                                new OnSuccessListener<PendingDynamicLinkData>() {
+
+                                                    @Override
+                                                    public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                                                        // Retrieve homestead invite id if it exists.
+                                                        Uri deepLink = null;
+                                                        if (pendingDynamicLinkData != null) {
+                                                            //Homestead id exists, loading join activity
+                                                            // with id in intent.
+                                                            Intent intent = getIntent();
+                                                            Uri uri = intent.getData();
+                                                            String homesteadInviteId = uri.getQueryParameter("homesteadid");
+                                                            Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
+
+                                                            Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
+                                                            createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
+                                                            startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+                                                        } else {
+                                                            Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
+                                                            startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+                                                        }
+                                                    }
+
+                                                }).addOnFailureListener(MainActivity.this, new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.d(TAG, "getDynamicLink onFailure: " + e);
+                                        Toast.makeText(MainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                                        startActivity(intent);
+                                    }
+                                });
+                            }
 
                         } else {
                             // User doesn't have an account. Creating new one.
@@ -202,20 +250,56 @@ public class MainActivity extends AppCompatActivity {
                                     user.getDisplayName(),
                                     user.getEmail(),
                                     user.getPhotoUrl().toString(),
-                                    "-L8_5eJ7_jNW2GsPQlxK",
                                     "node",
                                     "node");
                             Log.d(TAG, "onDataChange: creating user.." + userModel.toString());
                             ref.child(user.getUid()).setValue(userModel);
 
-                            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
+                            FirebaseDynamicLinks.getInstance()
+                                    .getDynamicLink(getIntent())
+                                    .addOnSuccessListener(MainActivity.this,
+                                            new OnSuccessListener<PendingDynamicLinkData>() {
+
+                                                @Override
+                                                public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                                                    // Retrieve homestead invite id if it exists.
+                                                    Uri deepLink = null;
+                                                    if (pendingDynamicLinkData != null) {
+                                                        //Homestead id exists, loading join activity
+                                                        // with id in intent.
+                                                        Intent intent = getIntent();
+                                                        Uri uri = intent.getData();
+                                                        String homesteadInviteId = uri.getQueryParameter("homesteadid");
+                                                        Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
+
+                                                        Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
+                                                        createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
+                                                        startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+                                                    } else {
+                                                        Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
+                                                        startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+                                                    }
+                                                }
+
+                                            }).addOnFailureListener(MainActivity.this, new OnFailureListener() {
                                 @Override
-                                public void onSuccess() {
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d(TAG, "getDynamicLink onFailure: " + e);
+                                    Toast.makeText(MainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
                                     Intent intent = new Intent(MainActivity.this, MainActivity.class);
                                     startActivity(intent);
-                                    finish();
                                 }
                             });
+
+//                            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
+//                                @Override
+//                                public void onSuccess() {
+//                                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
+////                                    Intent intent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
+//                                    startActivity(intent);
+//                                    finish();
+//                                }
+//                            });
                         }
                     }
 
@@ -226,6 +310,13 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
 
+
+        } else if (requestCode == CREATE_HOMESTEAD_REQUEST) {
+            if (resultCode == RESULT_OK) {
+
+            } else if (resultCode == RESULT_CANCELED)
+                Toast.makeText(this, "Error joining homestead.", Toast.LENGTH_SHORT).show();
+            finish();
 
         } else {
             Log.d(TAG, "onActivityResult: sign in failed");
@@ -296,6 +387,13 @@ public class MainActivity extends AppCompatActivity {
                                     Uri flowchartLink = task.getResult().getPreviewLink();
 
                                     Log.d(TAG, "onOptionsItemSelected: inviteUri: " + shortDynamicLinkUri);
+
+                                    Intent intent = new Intent(Intent.ACTION_SEND);
+                                    intent.setType("text/plain");
+                                    intent.putExtra(Intent.EXTRA_SUBJECT, "Invite URL");
+                                    intent.putExtra(Intent.EXTRA_TEXT, shortDynamicLinkUri.toString());
+                                    startActivity(Intent.createChooser(intent, "Invite URL"));
+
                                 } else {
                                     // Error
                                     // ...
@@ -310,6 +408,39 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, ChatActivity.class);
                 startActivity(intent);
                 return true;
+
+            case (R.id.menuLeaveHomestead):
+                new AlertDialog.Builder(this)
+                        .setTitle("Leave Homestead")
+                        .setMessage("Are you sure you want to leave this Homestead?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                FirebaseResolver.leaveHomestead();
+
+                                AuthUI.getInstance().signOut(MainActivity.this)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                // User is now signed out
+                                                if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
+                                                    ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
+                                                            .clearApplicationUserData(); // note: it has a return value!
+                                                } else {
+                                                    // use old hacky way, which can be removed
+                                                    // once minSdkVersion goes above 19 in a few years.
+                                                    Log.d(TAG, "onComplete: Application is pre kitkat.");
+                                                }
+                                                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                                recreate();
+
+                                            }
+                                        });
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null).show();
         }
         return super.onOptionsItemSelected(item);
     }

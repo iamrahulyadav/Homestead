@@ -94,9 +94,13 @@ public class CurrentUser {
         });
     }
 
+
+
     public interface OnGetDataListener {
         //this is for callbacks
         void onSuccess();
     }
+
+
 
 }
