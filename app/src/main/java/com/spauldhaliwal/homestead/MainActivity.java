@@ -74,257 +74,32 @@ public class MainActivity extends AppCompatActivity {
 
         final FirebaseAuth auth = FirebaseAuth.getInstance();
 
-        if (auth.getCurrentUser() != null) {
-            // User is already signed in
-            Log.d(TAG, "onCreate: already signed in");
-            Log.d(TAG, "onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setSubtitleTextColor(616161);
+        setSupportActionBar(toolbar);
 
-            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
-                @Override
-                public void onSuccess() {
+        FloatingActionButton fab = findViewById(R.id.fab);
 
-                    if (CurrentUser.getHomesteadUid() != null) {
-                        // User belongs to a homestead.
-                        setContentView(R.layout.activity_main);
-                        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-                        toolbar.setSubtitleTextColor(616161);
-                        setSupportActionBar(toolbar);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AddEditActivity.class);
+                startActivity(intent);
+            }
+        });
 
-                        FloatingActionButton fab = findViewById(R.id.fab);
+        mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
 
-                        fab.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(MainActivity.this, AddEditActivity.class);
-                                startActivity(intent);
-                            }
-                        });
+        // ViewPager and its adapters use support library fragments,
+        // so use getSupportFragmentManager.
+        mViewPager = findViewById(R.id.content_pager);
 
-                        mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
 
-                        // ViewPager and its adapters use support library fragments,
-                        // so use getSupportFragmentManager.
-                        mViewPager = findViewById(R.id.content_pager);
-
-                        mViewPager.setAdapter(mAdapter);
-                        mAdapter.notifyDataSetChanged();
-                    } else {
-                        // User does not belong to a homestead
-                        Log.d(TAG, "onSuccess: User does not belong to a homestead");
-
-                        FirebaseDynamicLinks.getInstance()
-                                .getDynamicLink(getIntent())
-                                .addOnSuccessListener(MainActivity.this,
-                                        new OnSuccessListener<PendingDynamicLinkData>() {
-
-                                            @Override
-                                            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                                                // Retrieve homestead invite id if it exists.
-                                                Uri deepLink = null;
-                                                if (pendingDynamicLinkData != null) {
-                                                    Intent intent = getIntent();
-                                                    Uri uri = intent.getData();
-                                                    String homesteadInviteId = uri.getQueryParameter("homesteadid");
-                                                    Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
-
-                                                    Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
-                                                    createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
-                                                    startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
-                                                } else {
-                                                    Log.d(TAG, "onSuccess: Homestead invite id does not exist");
-                                                    Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
-                                                    startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
-                                                }
-                                            }
-
-                                        }).addOnFailureListener(MainActivity.this, new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-
-                                Log.d(TAG, "getDynamicLink onFailure: " + e);
-                                Toast.makeText(MainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                                startActivity(intent);
-                            }
-                        });
-                    }
-                }
-            });
-
-        } else {
-            // User is not signed in
-            startActivityForResult(AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setAvailableProviders(Arrays.asList(
-                                    new AuthUI.IdpConfig.GoogleBuilder().build()
-                            )).build(),
-                    RC_SIGN_IN);
-        }
 
         super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult: starts");
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
-
-            if (resultCode == RESULT_OK) {
-                // Successfully signed in.
-                user = FirebaseAuth.getInstance().getCurrentUser();
-
-
-                final DatabaseReference ref = FirebaseDatabase.getInstance().getReference(UsersContract.ROOT_NODE);
-
-                ref.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            // User already has an account
-
-                            Log.d(TAG, "onDataChange: dataSnapshot == " + dataSnapshot);
-
-                            if (dataSnapshot.hasChild(UsersContract.HOMESTEAD_ID)) {
-                                //User has a homesteadId
-                                ref.child(user.getUid())
-                                        .child(UsersContract.TOKEN_ID)
-                                        .setValue(FirebaseInstanceId.getInstance().getToken());
-
-                                CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
-                                    @Override
-                                    public void onSuccess() {
-                                        Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                                        startActivity(intent);
-                                        finish();
-
-                                        FirebaseMessaging.getInstance()
-                                                .subscribeToTopic(CurrentUser.getHomesteadUid() + HomesteadsContract.NOTIFICATIONS);
-                                    }
-                                });
-                            } else {
-                                Toast.makeText(MainActivity.this, "User does not belong to any homestead.", Toast.LENGTH_LONG).show();
-                                FirebaseDynamicLinks.getInstance()
-                                        .getDynamicLink(getIntent())
-                                        .addOnSuccessListener(MainActivity.this,
-                                                new OnSuccessListener<PendingDynamicLinkData>() {
-
-                                                    @Override
-                                                    public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                                                        // Retrieve homestead invite id if it exists.
-                                                        Uri deepLink = null;
-                                                        if (pendingDynamicLinkData != null) {
-                                                            //Homestead id exists, loading join activity
-                                                            // with id in intent.
-                                                            Intent intent = getIntent();
-                                                            Uri uri = intent.getData();
-                                                            String homesteadInviteId = uri.getQueryParameter("homesteadid");
-                                                            Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
-
-                                                            Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
-                                                            createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
-                                                            startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
-                                                        } else {
-                                                            Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
-                                                            startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
-                                                        }
-                                                    }
-
-                                                }).addOnFailureListener(MainActivity.this, new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.d(TAG, "getDynamicLink onFailure: " + e);
-                                        Toast.makeText(MainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                                        startActivity(intent);
-                                    }
-                                });
-                            }
-
-                        } else {
-                            // User doesn't have an account. Creating new one.
-                            Log.d(TAG, "onDataChange: creating user.");
-                            UserModel userModel = new UserModel(user.getUid(),
-                                    FirebaseInstanceId.getInstance().getToken(),
-                                    user.getDisplayName(),
-                                    user.getEmail(),
-                                    user.getPhotoUrl().toString(),
-                                    "node",
-                                    "node");
-                            Log.d(TAG, "onDataChange: creating user.." + userModel.toString());
-                            ref.child(user.getUid()).setValue(userModel);
-
-                            FirebaseDynamicLinks.getInstance()
-                                    .getDynamicLink(getIntent())
-                                    .addOnSuccessListener(MainActivity.this,
-                                            new OnSuccessListener<PendingDynamicLinkData>() {
-
-                                                @Override
-                                                public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                                                    // Retrieve homestead invite id if it exists.
-                                                    Uri deepLink = null;
-                                                    if (pendingDynamicLinkData != null) {
-                                                        //Homestead id exists, loading join activity
-                                                        // with id in intent.
-                                                        Intent intent = getIntent();
-                                                        Uri uri = intent.getData();
-                                                        String homesteadInviteId = uri.getQueryParameter("homesteadid");
-                                                        Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
-
-                                                        Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
-                                                        createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
-                                                        startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
-                                                    } else {
-                                                        Intent createJoinHomesteadIntent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
-                                                        startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
-                                                    }
-                                                }
-
-                                            }).addOnFailureListener(MainActivity.this, new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d(TAG, "getDynamicLink onFailure: " + e);
-                                    Toast.makeText(MainActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                }
-                            });
-
-//                            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
-//                                @Override
-//                                public void onSuccess() {
-//                                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
-////                                    Intent intent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
-//                                    startActivity(intent);
-//                                    finish();
-//                                }
-//                            });
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-
-
-        } else if (requestCode == CREATE_HOMESTEAD_REQUEST) {
-            if (resultCode == RESULT_OK) {
-
-            } else if (resultCode == RESULT_CANCELED)
-                Toast.makeText(this, "Error joining homestead.", Toast.LENGTH_SHORT).show();
-            finish();
-
-        } else {
-            Log.d(TAG, "onActivityResult: sign in failed");
-            // Sign in failed.
-            Toast.makeText(this, "Sign-in Error", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-
     }
 
 

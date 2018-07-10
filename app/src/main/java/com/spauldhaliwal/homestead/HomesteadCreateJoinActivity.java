@@ -67,12 +67,20 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     if (dataSnapshot.exists()) {
                                         // User already has an account
+                                        Log.d(TAG, "onDataChange: User has account, assigning to homestead: " + homesteadInviteId);
                                         ref.child(user.getUid())
                                                 .child(UsersContract.HOMESTEAD_ID)
                                                 .setValue(homesteadInviteId);
-                                        Intent intent = new Intent(HomesteadCreateJoinActivity.this, MainActivity.class);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        startActivity(intent);
+
+                                        CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
+                                            @Override
+                                            public void onSuccess() {
+                                                Intent intent = new Intent(HomesteadCreateJoinActivity.this, MainActivity.class);
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                startActivity(intent);
+
+                                            }
+                                        });
 
                                     } else {
                                         Log.d(TAG, "onDataChange: Error creating account.");
