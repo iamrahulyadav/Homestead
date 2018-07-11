@@ -107,6 +107,18 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (FirebaseResolver.createHomestead(homesteadName.getText().toString())) {
+                    CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
+                        @Override
+                        public void onSuccess() {
+                            Intent intent = new Intent(HomesteadCreateJoinActivity.this,
+                                    MainActivity.class);
+                            setResult(Activity.RESULT_OK, intent);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
+
                     Intent intent = new Intent(HomesteadCreateJoinActivity.this,
                             MainActivity.class);
                     setResult(Activity.RESULT_OK, intent);

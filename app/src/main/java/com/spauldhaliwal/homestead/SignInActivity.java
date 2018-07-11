@@ -29,6 +29,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Arrays;
 
+import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
+
 public class SignInActivity extends AppCompatActivity {
 
     private static final String TAG = "SignInActivity";
@@ -43,7 +45,6 @@ public class SignInActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: SignIn Activity Starts");
         super.onCreate(savedInstanceState);
         final FirebaseAuth auth = FirebaseAuth.getInstance();
-        boolean signInSuccess = false;
 
         if (auth.getCurrentUser() != null) {
             // User is already signed in
@@ -56,7 +57,8 @@ public class SignInActivity extends AppCompatActivity {
 
                     if (CurrentUser.getHomesteadUid() != null) {
                         // User belongs to a homestead.
-                        Intent launchMainActivityIntent = new Intent(SignInActivity.this, MainActivity.class);
+                        Intent launchMainActivityIntent = new Intent(SignInActivity.this, MainActivity.class)
+                                .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                         startActivity(launchMainActivityIntent);
                         finish();
 
@@ -79,12 +81,14 @@ public class SignInActivity extends AppCompatActivity {
                                                     String homesteadInviteId = uri.getQueryParameter("homesteadid");
                                                     Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
 
-                                                    Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class);
+                                                    Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+                                                            .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                                     createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
                                                     startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
                                                 } else {
                                                     Log.d(TAG, "onSuccess: Homestead invite id does not exist");
-                                                    Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class);
+                                                    Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+                                                            .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                                     startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
                                                 }
                                             }
@@ -95,7 +99,8 @@ public class SignInActivity extends AppCompatActivity {
 
                                 Log.d(TAG, "getDynamicLink onFailure: " + e);
                                 Toast.makeText(SignInActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                                Intent intent = new Intent(SignInActivity.this, MainActivity.class)
+                                        .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                 startActivity(intent);
                             }
                         });
@@ -146,7 +151,8 @@ public class SignInActivity extends AppCompatActivity {
                                 CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
                                     @Override
                                     public void onSuccess() {
-                                        Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                                        Intent intent = new Intent(SignInActivity.this, MainActivity.class)
+                                                .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                         startActivity(intent);
                                         finish();
 
@@ -173,11 +179,13 @@ public class SignInActivity extends AppCompatActivity {
                                                             String homesteadInviteId = uri.getQueryParameter("homesteadid");
                                                             Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
 
-                                                            Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class);
+                                                            Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+                                                                    .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                                             createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
                                                             startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
                                                         } else {
-                                                            Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class);
+                                                            Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+                                                                    .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                                             startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
                                                         }
                                                     }
@@ -223,11 +231,13 @@ public class SignInActivity extends AppCompatActivity {
                                                         String homesteadInviteId = uri.getQueryParameter("homesteadid");
                                                         Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
 
-                                                        Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class);
+                                                        Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+                                                                .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                                         createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
                                                         startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
                                                     } else {
-                                                        Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class);
+                                                        Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+                                                                .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                                         startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
                                                     }
                                                 }
@@ -237,7 +247,8 @@ public class SignInActivity extends AppCompatActivity {
                                 public void onFailure(@NonNull Exception e) {
                                     Log.d(TAG, "getDynamicLink onFailure: " + e);
                                     Toast.makeText(SignInActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(SignInActivity.this, MainActivity.class);
+                                    Intent intent = new Intent(SignInActivity.this, MainActivity.class)
+                                            .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                     startActivity(intent);
                                 }
                             });
