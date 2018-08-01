@@ -99,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
                     mViewPager = findViewById(R.id.content_pager);
                     mViewPager.setAdapter(mAdapter);
                     mAdapter.notifyDataSetChanged();
-
                 }
             });
         } else {
@@ -110,12 +109,8 @@ public class MainActivity extends AppCompatActivity {
             mAdapter.notifyDataSetChanged();
         }
 
-
-
         super.onCreate(savedInstanceState);
     }
-
-
 
 
     @Override

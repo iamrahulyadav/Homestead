@@ -158,7 +158,7 @@ public class ChatActivity extends AppCompatActivity {
                         System.currentTimeMillis(),
                         CurrentUser.getProfileImage())) {
                     editMessage.setText("");
-                    linearLayoutManager.smoothScrollToPosition(messageListView, null, chatAdapter.getItemCount()+1);
+                    linearLayoutManager.smoothScrollToPosition(messageListView, null, chatAdapter.getItemCount() + 1);
                 } else {
                     Toast.makeText(ChatActivity.this, "Message empty", Toast.LENGTH_SHORT).show();
                 }
@@ -253,6 +253,7 @@ public class ChatActivity extends AppCompatActivity {
                 currentPage++;
 
                 chatAdapter.notifyDataSetChanged();
+                linearLayoutManager.smoothScrollToPosition(messageListView, null, chatAdapter.getItemCount() + 1);
                 Log.d(TAG, "loadMessages: messages loaded: " + linearLayoutManager.getItemCount());
             }
 
