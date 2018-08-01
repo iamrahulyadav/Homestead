@@ -2,7 +2,6 @@ package com.spauldhaliwal.homestead;
 
 import android.content.ContentUris;
 import android.net.Uri;
-import android.provider.BaseColumns;
 
 import static com.spauldhaliwal.homestead.AppProvider.CONTENT_AUTHORITY;
 import static com.spauldhaliwal.homestead.AppProvider.CONTENT_AUTHORITY_URI;

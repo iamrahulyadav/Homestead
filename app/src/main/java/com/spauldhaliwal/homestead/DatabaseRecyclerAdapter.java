@@ -13,9 +13,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.spauldhaliwal.homestead.DatabaseRecyclerAdapter.JobViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.spauldhaliwal.homestead.DatabaseRecyclerAdapter.JobViewHolder;
 
 /**
  * Created by pauldhaliwal on 2018-03-24.

@@ -2,16 +2,10 @@ package com.spauldhaliwal.homestead;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
-import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
-
-import com.spauldhaliwal.homestead.JobsContract;
 
 /**
  * Created by pauldhaliwal on 2018-03-07.

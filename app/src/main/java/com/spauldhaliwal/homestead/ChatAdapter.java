@@ -1,10 +1,7 @@
 package com.spauldhaliwal.homestead;
 
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.v4.widget.Space;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
@@ -17,9 +14,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.ObservableSnapshotArray;
-import com.vdurmont.emoji.EmojiParser;
 
 import java.util.Arrays;
 import java.util.HashMap;
