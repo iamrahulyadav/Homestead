@@ -7,6 +7,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.test.suitebuilder.annotation.LargeTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -286,6 +288,5 @@ public class SignInActivity extends AppCompatActivity {
             Toast.makeText(this, "Sign-in Error", Toast.LENGTH_SHORT).show();
             finish();
         }
-
     }
 }

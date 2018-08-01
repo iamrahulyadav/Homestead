@@ -23,7 +23,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -71,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "MainActivity onCreate: starts");
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-
         final FirebaseAuth auth = FirebaseAuth.getInstance();
 
         setContentView(R.layout.activity_main);
@@ -89,18 +87,35 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
+        if (CurrentUser.getHomesteadUid() == null) {
+            //Check to see if user details have been retrieved from Firebase
+            Log.d(TAG, "onCreate: CurrentUser.getHomesteadId == " + CurrentUser.getHomesteadUid());
+            Toast.makeText(this, "CurrentUser was null", Toast.LENGTH_SHORT).show();
 
-        // ViewPager and its adapters use support library fragments,
-        // so use getSupportFragmentManager.
-        mViewPager = findViewById(R.id.content_pager);
+            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
+                @Override
+                public void onSuccess() {
+                    mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
+                    mViewPager = findViewById(R.id.content_pager);
+                    mViewPager.setAdapter(mAdapter);
+                    mAdapter.notifyDataSetChanged();
 
-        mViewPager.setAdapter(mAdapter);
-        mAdapter.notifyDataSetChanged();
+                }
+            });
+        } else {
+            Log.d(TAG, "onCreate: CurrentUser.getHomesteadId == " + CurrentUser.getHomesteadUid());
+            mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
+            mViewPager = findViewById(R.id.content_pager);
+            mViewPager.setAdapter(mAdapter);
+            mAdapter.notifyDataSetChanged();
+        }
+
 
 
         super.onCreate(savedInstanceState);
     }
+
+
 
 
     @Override

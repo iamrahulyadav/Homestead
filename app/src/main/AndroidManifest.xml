@@ -46,14 +46,6 @@
             android:authorities="com.spauldhaliwal.homestead.provider"
             android:exported="false" />
 
-        <!-- <activity android:name=".SignIn"> -->
-        <!-- <intent-filter> -->
-        <!-- <action android:name="android.intent.action.MAIN" /> -->
-
-
-        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-        <!-- </intent-filter> -->
-        <!-- </activity> -->
         <activity android:name=".HomesteadCreateJoinActivity" />
         <activity android:name=".SignInActivity">
             <intent-filter>
