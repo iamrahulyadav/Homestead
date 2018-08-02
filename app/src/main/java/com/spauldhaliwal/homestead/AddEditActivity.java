@@ -40,6 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AddEditActivity extends AppCompatActivity {
+
+    //TODO Fix claim/mark as finished functionality
+
     private static final String TAG = "AddEditActivity";
 
     public enum openMode {ADD, VIEW, AVAILABLE, CREATOR, OWNER}

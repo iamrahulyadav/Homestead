@@ -10,12 +10,13 @@
         android:id="@+id/personal_currentlySignedInAs"
         android:layout_width="wrap_content"
         android:layout_height="23dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
-        android:text="Currently signed in as:"
+        android:text="Signed in as:"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/personal_recycler_list_view"
@@ -40,4 +41,19 @@
         app:layout_constraintStart_toEndOf="@+id/personal_currentlySignedInAs"
         app:layout_constraintTop_toTopOf="@+id/personal_currentlySignedInAs"
         tools:text="currentUser" />
+
+    <ImageView
+        android:id="@+id/personalProfileImageList"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/personal_recycler_list_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/personal_userEmail"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/com_facebook_profile_picture_blank_square" />
 </android.support.constraint.ConstraintLayout>

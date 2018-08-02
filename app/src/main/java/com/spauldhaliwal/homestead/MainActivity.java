@@ -11,6 +11,7 @@ import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.ImageViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,8 +20,12 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -41,10 +46,6 @@ public class MainActivity extends AppCompatActivity {
     // representing an object in the collection.
     ViewPager mViewPager;
     HomeBoardPagerAdapter mAdapter;
-    public static final int RC_SIGN_IN = 1;
-    public static final int CREATE_HOMESTEAD_REQUEST = 2;
-
-    String homesteadInviteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
             CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
                 @Override
                 public void onSuccess() {
+                    ImageView profileImage = findViewById(R.id.mainProfileImageView);
+                    Glide.with(profileImage.getContext()).load(CurrentUser.getProfileImage()).apply(RequestOptions.circleCropTransform()).into(profileImage);
+
                     mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
                     mViewPager = findViewById(R.id.content_pager);
                     mViewPager.setAdapter(mAdapter);
@@ -84,6 +88,15 @@ public class MainActivity extends AppCompatActivity {
             });
         } else {
             Log.d(TAG, "onCreate: CurrentUser.getHomesteadId == " + CurrentUser.getHomesteadUid());
+
+            TextView signedInEmail = findViewById(R.id.userEmail);
+            signedInEmail.setText(CurrentUser.getName());
+
+            String signedInUserPhotoUrl = CurrentUser.getProfileImage();
+            Log.d(TAG, "onCreate: signedInUserPhotoUrl = " + signedInUserPhotoUrl);
+            ImageView profileImage = findViewById(R.id.mainProfileImageView);
+            Glide.with(this).load(CurrentUser.getProfileImage()).apply(RequestOptions.circleCropTransform()).into(profileImage);
+
             mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
             mViewPager = findViewById(R.id.content_pager);
             mViewPager.setAdapter(mAdapter);

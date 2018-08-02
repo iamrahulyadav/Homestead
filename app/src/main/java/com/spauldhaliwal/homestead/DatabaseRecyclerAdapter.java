@@ -80,7 +80,7 @@ class DatabaseRecyclerAdapter extends FirebaseRecyclerAdapter<JobModel, JobViewH
             Log.d(TAG, "TaskViewHolder: starts");
             name = itemView.findViewById(R.id.job_name);
             description = itemView.findViewById(R.id.job_description);
-            creatorIdImage = itemView.findViewById(R.id.profileImageList);
+            creatorIdImage = itemView.findViewById(R.id.personalProfileImageList);
         }
 
         public void setName(String n) {
