@@ -1,5 +1,6 @@
 package com.spauldhaliwal.homestead;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -80,8 +81,6 @@ public class CurrentUser {
                 CurrentUser.homesteadUid = (String) dataSnapshot.child(UsersContract.HOMESTEAD_ID).getValue();
 
                 onGetDataListener.onSuccess();
-
-
             }
 
             @Override

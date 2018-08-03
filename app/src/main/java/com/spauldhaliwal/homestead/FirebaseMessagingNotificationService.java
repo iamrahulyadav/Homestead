@@ -27,12 +27,6 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
         super.onMessageReceived(remoteMessage);
         Log.d("msg", "onMessageReceived: " + remoteMessage.getData().toString() + CurrentUser.getUid());
 
-
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
-
         Map notificationData = remoteMessage.getData();
 
         String notificationType = notificationData.get("type").toString();
@@ -52,6 +46,11 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
             //only send in-app notifications if the senderUid and currentUserUid are not the same
             if (notificationType.equals(MessagesContract.TYPE)) {
                 channelId = "Chat Notification";
+
+                Intent intent = new Intent(this, ChatActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.mipmap.ic_launcher)
@@ -73,10 +72,14 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
                 manager.notify((int) System.currentTimeMillis(), builder.build());
 
             } else if (notificationType.equals(JobsContract.TYPE)) {
-
                 channelId = "New Jobs Notification";
                 String jobNotificationTitle = notificationData.get("jobTitle").toString();
                 String jobNotificationDescription = notificationData.get("jobDescription").toString();
+
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.mipmap.ic_launcher)

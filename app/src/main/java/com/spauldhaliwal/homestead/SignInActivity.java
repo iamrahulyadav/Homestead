@@ -1,6 +1,8 @@
 package com.spauldhaliwal.homestead;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -37,6 +39,7 @@ public class SignInActivity extends AppCompatActivity {
     public static final int RC_SIGN_IN = 1;
     public static final int CREATE_HOMESTEAD_REQUEST = 2;
 
+    Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +49,20 @@ public class SignInActivity extends AppCompatActivity {
 
         if (auth.getCurrentUser() != null) {
             // User is already signed in
-            Log.d(TAG, "onCreate: already signed in");
-            Log.d(TAG, "onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+            Log.d(TAG, "SignInActivity onCreate: already signed in");
+            Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
 
             CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
                 @Override
                 public void onSuccess() {
+                    //Persist user data using SharedPrefences
+                    SharedPreferences sharedPref = mContext.getSharedPreferences(
+                            "com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                            Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+                    Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+                    editor.apply();
 
                     if (CurrentUser.getHomesteadUid() != null) {
                         // User belongs to a homestead.
@@ -109,6 +120,7 @@ public class SignInActivity extends AppCompatActivity {
 
         } else {
             // User is not signed in
+            Log.d(TAG, "SignInActivity onCreate: not signed in");
             startActivityForResult(AuthUI.getInstance()
                             .createSignInIntentBuilder()
                             .setAvailableProviders(Arrays.asList(
@@ -150,6 +162,15 @@ public class SignInActivity extends AppCompatActivity {
                                 CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
                                     @Override
                                     public void onSuccess() {
+                                        //Persist user data using SharedPrefences
+                                        SharedPreferences sharedPref = mContext.getSharedPreferences(
+                                                "com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                                                Context.MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sharedPref.edit();
+                                        editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+                                        editor.apply();
+                                        Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+
                                         Intent intent = new Intent(SignInActivity.this, MainActivity.class)
                                                 .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                         startActivity(intent);
@@ -252,16 +273,6 @@ public class SignInActivity extends AppCompatActivity {
                                     startActivity(intent);
                                 }
                             });
-
-//                            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
-//                                @Override
-//                                public void onSuccess() {
-//                                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
-////                                    Intent intent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
-//                                    startActivity(intent);
-//                                    finish();
-//                                }
-//                            });
                         }
                     }
 

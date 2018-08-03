@@ -2,6 +2,7 @@ package com.spauldhaliwal.homestead;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
@@ -22,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.facebook.share.Share;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,6 +45,8 @@ public class ChatActivity extends AppCompatActivity {
 
     private final List<MessageModel> messagesList = new ArrayList<>();
 
+    private String homesteadId;
+
     Vibrator vibe;
 
     private static final int TOTAL_ITEMS_TO_ADD = 50;
@@ -63,6 +67,11 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        Context mContext = this;
+        SharedPreferences sharedPref = this.getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                Context.MODE_PRIVATE);
+        homesteadId = sharedPref.getString(UsersContract.HOMESTEAD_ID, null);
+
         super.onCreate(savedInstanceState);
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         setContentView(R.layout.chat_view);
@@ -100,7 +109,9 @@ public class ChatActivity extends AppCompatActivity {
 
 //        messageListView.addOnScrollListener(scrollListener);
 //
-        loadMessages();
+
+            loadMessages();
+
         ItemClickSupport.addTo(messageListView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
 
             @Override
@@ -166,7 +177,7 @@ public class ChatActivity extends AppCompatActivity {
         DatabaseReference messageRef = FirebaseDatabase.getInstance()
                 .getReference()
                 .child(MessagesContract.ROOT_NODE)
-                .child(CurrentUser.getHomesteadUid());
+                .child(homesteadId);
 
         Query messageQuery = messageRef
                 .orderByKey()
@@ -223,10 +234,11 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void loadMessages() {
+
         DatabaseReference messageRef = FirebaseDatabase.getInstance()
                 .getReference()
                 .child(MessagesContract.ROOT_NODE)
-                .child(CurrentUser.getHomesteadUid());
+                .child(homesteadId);
 
         Query messageQuery = messageRef.limitToLast(currentPage * TOTAL_ITEMS_TO_ADD);
 

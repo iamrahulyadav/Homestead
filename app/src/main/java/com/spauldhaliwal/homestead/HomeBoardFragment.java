@@ -1,12 +1,15 @@
 package com.spauldhaliwal.homestead;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +34,7 @@ public class HomeBoardFragment extends Fragment {
 
     DatabaseRecyclerAdapter firebaseAdapter;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private String homesteadId;
 
     @Nullable
     @Override
@@ -42,9 +46,17 @@ public class HomeBoardFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+
+
+
+        SharedPreferences sharedPref = getActivity().getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                Context.MODE_PRIVATE);
+        homesteadId = sharedPref.getString(UsersContract.HOMESTEAD_ID, null);
+        Log.d(TAG, "HomeboardFragment onActivityCreated: homesteadId: " + homesteadId);
+
         //TODO Display Homestead name. Implement in CurrentUser utiliy class.
 //        TextView homesteadName = getActivity().findViewById(R.id.homestead_task_list_header_text);
-//        homesteadName.setText(CurrentUser.getHomesteadUid());
+//        homesteadName.setText(CurrentUser.getHomesteadName());
 
         final RecyclerView recyclerView = getActivity().findViewById(R.id.recycler_list_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -52,7 +64,7 @@ public class HomeBoardFragment extends Fragment {
         Query query = FirebaseDatabase.getInstance()
                 .getReference()
                 .child(HomesteadsContract.ROOT_NODE)
-                .child(CurrentUser.getHomesteadUid())
+                .child(homesteadId)
                 .child(HomesteadsContract.JOBS_NODE)
                 .orderByChild(JobsContract.SORT_ORDER);
 

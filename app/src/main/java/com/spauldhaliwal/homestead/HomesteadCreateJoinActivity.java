@@ -1,9 +1,12 @@
 package com.spauldhaliwal.homestead;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,7 +28,7 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
 
     private static final String TAG = "HomesteadCreateJoinActi";
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
+    Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,15 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
                                         CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
                                             @Override
                                             public void onSuccess() {
+                                                //Persist user data using SharedPrefences
+                                                SharedPreferences sharedPref = mContext.getSharedPreferences(
+                                                        "com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                                                        Context.MODE_PRIVATE);
+                                                SharedPreferences.Editor editor = sharedPref.edit();
+                                                editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+                                                Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+                                                editor.apply();
+
                                                 Intent intent = new Intent(HomesteadCreateJoinActivity.this, MainActivity.class);
                                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                 startActivity(intent);
@@ -99,9 +111,19 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (FirebaseResolver.createHomestead(homesteadName.getText().toString())) {
+                    Log.d(TAG, "Homestead create onClick: creating homestead");
                     CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
                         @Override
                         public void onSuccess() {
+                            //Persist user data using SharedPrefences
+                            SharedPreferences sharedPref = mContext.getSharedPreferences(
+                                    "com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                                    Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+                            Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+                            editor.commit();
+
                             Intent intent = new Intent(HomesteadCreateJoinActivity.this,
                                     MainActivity.class);
                             setResult(Activity.RESULT_OK, intent);
@@ -111,12 +133,6 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
                         }
                     });
 
-                    Intent intent = new Intent(HomesteadCreateJoinActivity.this,
-                            MainActivity.class);
-                    setResult(Activity.RESULT_OK, intent);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
                 } else {
                     Toast.makeText(HomesteadCreateJoinActivity.this,
                             "Homesteads require a name.",
@@ -129,22 +145,17 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
         joinHomesteadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomesteadCreateJoinActivity.this, MainActivity.class);
-                setResult(Activity.RESULT_OK, intent);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
+                //TODO implement invite link parsing functionality.
+                final Snackbar snackbar = Snackbar.make(v, "Follow an invite link to join an existing Homestead", Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction("Dismiss", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        snackbar.dismiss();
+                    }
+                });
+                    snackbar.show();
             }
         });
 
-//        CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
-//            @Override
-//            public void onSuccess() {
-//                Intent intent = new Intent(HomesteadCreateJoinActivity.this, MainActivity.class);
-////                                    Intent intent = new Intent(MainActivity.this, HomesteadCreateJoinActivity.class);
-//                startActivity(intent);
-//                finish();
-//            }
-//        });
     }
 }

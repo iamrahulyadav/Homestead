@@ -75,23 +75,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        if (CurrentUser.getHomesteadUid() == null) {
-            //Check to see if user details have been retrieved from Firebase
-            Log.d(TAG, "onCreate: CurrentUser.getHomesteadId == " + CurrentUser.getHomesteadUid());
-            Toast.makeText(this, "CurrentUser was null", Toast.LENGTH_SHORT).show();
-
-            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
-                @Override
-                public void onSuccess() {
-
-                    mAdapter = new HomesteadBoardPagerAdapter(getSupportFragmentManager());
-                    mViewPager = findViewById(R.id.content_pager);
-                    mViewPager.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
-                }
-            });
-        } else {
-            Log.d(TAG, "onCreate: CurrentUser.getHomesteadId == " + CurrentUser.getHomesteadUid());
 
             //Set overflow icon to user's profile image
             Glide.with(this)
@@ -109,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             mViewPager = findViewById(R.id.content_pager);
             mViewPager.setAdapter(mAdapter);
             mAdapter.notifyDataSetChanged();
-        }
+
 
         super.onCreate(savedInstanceState);
     }
