@@ -47,12 +47,6 @@ public class PersonalBoardFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        TextView signedInEmail = getActivity().findViewById(R.id.personal_userEmail);
-        signedInEmail.setText(user.getEmail());
-
-        ImageView profileImage = getActivity().findViewById(R.id.personalProfileImageList);
-        Glide.with(this).load(CurrentUser.getProfileImage()).apply(RequestOptions.circleCropTransform()).into(profileImage);
-
         final RecyclerView recyclerView = getActivity().findViewById(R.id.personal_recycler_list_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 

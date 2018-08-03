@@ -9,10 +9,10 @@ import android.util.Log;
  * Created by pauldhaliwal on 2018-03-12.
  */
 
-public class HomeBoardPagerAdapter extends FragmentPagerAdapter {
-    private static final String TAG = "HomeBoardPagerAdapter";
+public class HomesteadBoardPagerAdapter extends FragmentPagerAdapter {
+    private static final String TAG = "HomesteadBoardPagerAdapter";
 
-    public HomeBoardPagerAdapter(FragmentManager fm) {
+    public HomesteadBoardPagerAdapter(FragmentManager fm) {
         super(fm);
     }
 

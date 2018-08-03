@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Window;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -58,6 +59,7 @@ public class SignInActivity extends AppCompatActivity {
                                 .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                         startActivity(launchMainActivityIntent);
                         finish();
+                        overridePendingTransition(0, 0);
 
                     } else {
                         // User does not belong to a homestead
@@ -152,6 +154,7 @@ public class SignInActivity extends AppCompatActivity {
                                                 .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
                                         startActivity(intent);
                                         finish();
+                                        overridePendingTransition(0, 0);
 
                                         FirebaseMessaging.getInstance()
                                                 .subscribeToTopic(CurrentUser.getHomesteadUid() + HomesteadsContract.NOTIFICATIONS);

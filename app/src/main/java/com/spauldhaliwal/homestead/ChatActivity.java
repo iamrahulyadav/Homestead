@@ -70,7 +70,6 @@ public class ChatActivity extends AppCompatActivity {
         toolbar.setSubtitleTextColor(616161);
         setSupportActionBar(toolbar);
 
-        setSupportActionBar(toolbar);
 
         ImageButton sendButton = findViewById(R.id.chatSendButton);
         final EditText editMessage = findViewById(R.id.chatMessage);

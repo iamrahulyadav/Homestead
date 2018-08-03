@@ -1,17 +1,19 @@
 package com.spauldhaliwal.homestead;
 
+import android.app.ActionBar;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.ImageViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,12 +22,12 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     // When requested, this adapter returns a HomeBoardFragment,
     // representing an object in the collection.
     ViewPager mViewPager;
-    HomeBoardPagerAdapter mAdapter;
+    HomesteadBoardPagerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +57,13 @@ public class MainActivity extends AppCompatActivity {
         final FirebaseAuth auth = FirebaseAuth.getInstance();
 
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setSubtitleTextColor(616161);
         setSupportActionBar(toolbar);
+
+
+        final ActionBar actionBar = getActionBar();
+
 
         FloatingActionButton fab = findViewById(R.id.fab);
 
@@ -77,10 +83,8 @@ public class MainActivity extends AppCompatActivity {
             CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
                 @Override
                 public void onSuccess() {
-                    ImageView profileImage = findViewById(R.id.mainProfileImageView);
-                    Glide.with(profileImage.getContext()).load(CurrentUser.getProfileImage()).apply(RequestOptions.circleCropTransform()).into(profileImage);
 
-                    mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
+                    mAdapter = new HomesteadBoardPagerAdapter(getSupportFragmentManager());
                     mViewPager = findViewById(R.id.content_pager);
                     mViewPager.setAdapter(mAdapter);
                     mAdapter.notifyDataSetChanged();
@@ -89,15 +93,19 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "onCreate: CurrentUser.getHomesteadId == " + CurrentUser.getHomesteadUid());
 
-            TextView signedInEmail = findViewById(R.id.userEmail);
-            signedInEmail.setText(CurrentUser.getName());
+            //Set overflow icon to user's profile image
+            Glide.with(this)
+                    .load(CurrentUser.getProfileImage())
+                    .apply(RequestOptions.circleCropTransform().override(65, 65))
+                    .into(new SimpleTarget<Drawable>() {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource,
+                                                    @Nullable Transition<? super Drawable> transition) {
+                            toolbar.setOverflowIcon(resource);
+                        }
+                    });
 
-            String signedInUserPhotoUrl = CurrentUser.getProfileImage();
-            Log.d(TAG, "onCreate: signedInUserPhotoUrl = " + signedInUserPhotoUrl);
-            ImageView profileImage = findViewById(R.id.mainProfileImageView);
-            Glide.with(this).load(CurrentUser.getProfileImage()).apply(RequestOptions.circleCropTransform()).into(profileImage);
-
-            mAdapter = new HomeBoardPagerAdapter(getSupportFragmentManager());
+            mAdapter = new HomesteadBoardPagerAdapter(getSupportFragmentManager());
             mViewPager = findViewById(R.id.content_pager);
             mViewPager.setAdapter(mAdapter);
             mAdapter.notifyDataSetChanged();

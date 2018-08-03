@@ -42,11 +42,9 @@ public class HomeBoardFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-//        TextView signedInEmail = getActivity().findViewById(R.id.userEmail);
-//        signedInEmail.setText(user.getEmail());
-//
-//        ImageView profileImage = getActivity().findViewById(R.id.profileImageList);
-//        Glide.with(this).load(CurrentUser.getProfileImage()).apply(RequestOptions.circleCropTransform()).into(profileImage);
+        //TODO Display Homestead name. Implement in CurrentUser utiliy class.
+//        TextView homesteadName = getActivity().findViewById(R.id.homestead_task_list_header_text);
+//        homesteadName.setText(CurrentUser.getHomesteadUid());
 
         final RecyclerView recyclerView = getActivity().findViewById(R.id.recycler_list_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
