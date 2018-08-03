@@ -40,63 +40,87 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
 
         if (homesteadInviteId != null) {
             // HomesteadInviteId found. Confirming whether or not the user wishes to join the homestead.
-            new AlertDialog.Builder(this)
-                    .setTitle("Join Homestead")
-                    .setMessage("Are you sure you want to join this Homestead?")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            final DatabaseReference ref = FirebaseDatabase.getInstance().getReference(UsersContract.ROOT_NODE);
-                            user = FirebaseAuth.getInstance().getCurrentUser();
+            final DatabaseReference homesteadRef = FirebaseDatabase
+                    .getInstance()
+                    .getReference(HomesteadsContract.ROOT_NODE)
+                    .child(homesteadInviteId);
 
-                            ref.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            homesteadRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    final String homesteadName = (String) dataSnapshot.child(HomesteadsContract.NAME).getValue();
+
+                    AlertDialog show = new AlertDialog.Builder(mContext)
+                            .setTitle("Join Homestead")
+                            .setMessage("Are you sure you want to join this Homestead?")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    Log.d(TAG, "onCancelled: DatabaseError: " + databaseError);
-                                    Intent intent = new Intent();
-                                    setResult(Activity.RESULT_CANCELED, intent);
-                                    finish();
-                                }
+                                public void onClick(DialogInterface dialog, int which) {
+                                    final DatabaseReference ref = FirebaseDatabase.getInstance().getReference(UsersContract.ROOT_NODE);
+                                    user = FirebaseAuth.getInstance().getCurrentUser();
 
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.exists()) {
-                                        // User already has an account
-                                        Log.d(TAG, "onDataChange: User has account, assigning to homestead: " + homesteadInviteId);
-                                        ref.child(user.getUid())
-                                                .child(UsersContract.HOMESTEAD_ID)
-                                                .setValue(homesteadInviteId);
+                                    ref.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                            Log.d(TAG, "onCancelled: DatabaseError: " + databaseError);
+                                            Intent intent = new Intent();
+                                            setResult(Activity.RESULT_CANCELED, intent);
+                                            finish();
+                                        }
 
-                                        CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
-                                            @Override
-                                            public void onSuccess() {
-                                                //Persist user data using SharedPrefences
-                                                SharedPreferences sharedPref = mContext.getSharedPreferences(
-                                                        "com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
-                                                        Context.MODE_PRIVATE);
-                                                SharedPreferences.Editor editor = sharedPref.edit();
-                                                editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
-                                                Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
-                                                editor.apply();
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            if (dataSnapshot.exists()) {
+                                                // User already has an account
+                                                Log.d(TAG, "onDataChange: User has account, assigning to homestead: " + homesteadInviteId);
+                                                ref.child(user.getUid())
+                                                        .child(UsersContract.HOMESTEAD_ID)
+                                                        .setValue(homesteadInviteId);
 
-                                                Intent intent = new Intent(HomesteadCreateJoinActivity.this, MainActivity.class);
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                startActivity(intent);
+                                                ref.child(user.getUid())
+                                                        .child(UsersContract.HOMESTEAD_NAME)
+                                                        .setValue(homesteadName);
 
+
+                                                CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
+                                                    @Override
+                                                    public void onSuccess() {
+                                                        //Persist user data using SharedPrefences
+                                                        SharedPreferences sharedPref = mContext.getSharedPreferences(
+                                                                "com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                                                                Context.MODE_PRIVATE);
+                                                        SharedPreferences.Editor editor = sharedPref.edit();
+                                                        editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+                                                        editor.putString(UsersContract.HOMESTEAD_NAME, CurrentUser.getHomesteadName());
+                                                        Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+                                                        editor.apply();
+
+                                                        Intent intent = new Intent(HomesteadCreateJoinActivity.this, MainActivity.class);
+                                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                        startActivity(intent);
+
+                                                    }
+                                                });
+
+                                            } else {
+                                                Log.d(TAG, "onDataChange: Error creating account.");
+                                                Intent intent = new Intent();
+                                                setResult(Activity.RESULT_CANCELED, intent);
+                                                finish();
                                             }
-                                        });
-
-                                    } else {
-                                        Log.d(TAG, "onDataChange: Error creating account.");
-                                        Intent intent = new Intent();
-                                        setResult(Activity.RESULT_CANCELED, intent);
-                                        finish();
-                                    }
+                                        }
+                                    });
                                 }
-                            });
-                        }
-                    })
-                    .setNegativeButton(android.R.string.no, null).show();
+                            })
+                            .setNegativeButton(android.R.string.no, null).show();
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
 
         }
 
@@ -121,8 +145,9 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
                                     Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+                            editor.putString(UsersContract.HOMESTEAD_NAME, CurrentUser.getHomesteadName());
                             Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
-                            editor.commit();
+                            editor.apply();
 
                             Intent intent = new Intent(HomesteadCreateJoinActivity.this,
                                     MainActivity.class);

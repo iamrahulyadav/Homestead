@@ -14,18 +14,20 @@ class UserModel implements Serializable {
     private String email;
     private String profileImage;
     private String homesteadId;
+    private String homesteadName;
     private String jobs;
     private String notifications;
 
     public UserModel() {}
 
-    public UserModel(String uid, String tokenId, String name, String email, String profileImage, String homesteadId, String jobs, String notifications) {
+    public UserModel(String uid, String tokenId, String name, String email, String profileImage, String homesteadId, String homesteadName, String jobs, String notifications) {
         this.uid = uid;
         this.tokenId = tokenId;
         this.name = name;
         this.email = email;
         this.profileImage = profileImage;
         this.homesteadId = homesteadId;
+        this.homesteadName = homesteadName;
         this.jobs = jobs;
         this.notifications = notifications;
     }
@@ -64,6 +66,10 @@ class UserModel implements Serializable {
         return homesteadId;
     }
 
+    public String getHomesteadName() {
+        return homesteadName;
+    }
+
     public String getJobs() {
         return jobs;
     }
@@ -81,6 +87,7 @@ class UserModel implements Serializable {
                 ", email='" + email + '\'' +
                 ", profileImage='" + profileImage + '\'' +
                 ", homesteadId='" + homesteadId + '\'' +
+                ", homesteadName='" + homesteadName + '\'' +
                 ", jobs='" + jobs + '\'' +
                 ", notifications='" + notifications + '\'' +
                 '}';

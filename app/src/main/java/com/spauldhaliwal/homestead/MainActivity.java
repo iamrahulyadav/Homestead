@@ -139,8 +139,12 @@ public class MainActivity extends AppCompatActivity {
             case (R.id.menuInvite):
                 String userId = CurrentUser.getUid();
                 String homesteadId = CurrentUser.getHomesteadUid();
+                String homesteadName = CurrentUser.getHomesteadName();
                 Task<ShortDynamicLink> dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
-                        .setLink(Uri.parse("https://homesteadapp.com/?homesteadid=" + homesteadId + "&userid=" + userId))
+                        .setLink(Uri.parse("https://homesteadapp.com/?homesteadid=" + homesteadId
+                                + "&userid="
+                                + userId))
+
                         .setDynamicLinkDomain("homesteadapp.page.link")
                         // Open links with this app on android
                         .setAndroidParameters(new DynamicLink.AndroidParameters.Builder().build())

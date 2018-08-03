@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,6 +32,7 @@ public class HomeBoardFragment extends Fragment {
     DatabaseRecyclerAdapter firebaseAdapter;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private String homesteadId;
+    private String homesteadName;
 
     @Nullable
     @Override
@@ -42,17 +44,15 @@ public class HomeBoardFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-
-
-
         SharedPreferences sharedPref = getActivity().getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
                 Context.MODE_PRIVATE);
         homesteadId = sharedPref.getString(UsersContract.HOMESTEAD_ID, null);
+        homesteadName = sharedPref.getString(UsersContract.HOMESTEAD_NAME, null);
         Log.d(TAG, "HomeboardFragment onActivityCreated: homesteadId: " + homesteadId);
 
         //TODO Display Homestead name. Implement in CurrentUser utiliy class.
-//        TextView homesteadName = getActivity().findViewById(R.id.homestead_task_list_header_text);
-//        homesteadName.setText(CurrentUser.getHomesteadName());
+        TextView homesteadNameTextView = getActivity().findViewById(R.id.homestead_task_list_header_text);
+        homesteadNameTextView.setText(homesteadName);
 
         final RecyclerView recyclerView = getActivity().findViewById(R.id.recycler_list_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

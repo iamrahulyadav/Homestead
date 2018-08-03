@@ -22,6 +22,7 @@ public class CurrentUser {
     private static String email;
     private static String profileImage;
     private static String homesteadUid;
+    private static String homesteadName;
     private static String jobs;
 
     private static UserModel userModel;
@@ -56,6 +57,10 @@ public class CurrentUser {
         return homesteadUid;
     }
 
+    public static String getHomesteadName() {
+        return homesteadName;
+    }
+
     public static String isJobs() {
         return jobs;
     }
@@ -78,6 +83,7 @@ public class CurrentUser {
                 CurrentUser.email = (String) dataSnapshot.child(UsersContract.EMAIL).getValue();
                 CurrentUser.profileImage = (String) dataSnapshot.child(UsersContract.PROFILE_IMAGE).getValue();
                 CurrentUser.homesteadUid = (String) dataSnapshot.child(UsersContract.HOMESTEAD_ID).getValue();
+                CurrentUser.homesteadName = (String) dataSnapshot.child(UsersContract.HOMESTEAD_NAME).getValue();
 
                 onGetDataListener.onSuccess();
             }

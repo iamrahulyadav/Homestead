@@ -315,6 +315,7 @@ public abstract class FirebaseResolver {
                     .getReference(HomesteadsContract.ROOT_NODE);
 
             String homesteadId = homesteadsRef.push().getKey();
+            String homesteadName = name;
 
             HomesteadModel newHomestead = new HomesteadModel(homesteadId, name);
             homesteadsRef.child(homesteadId).setValue(newHomestead);
@@ -326,6 +327,7 @@ public abstract class FirebaseResolver {
                     .child(userUid);
 
             userRef.child(UsersContract.HOMESTEAD_ID).setValue(homesteadId);
+            userRef.child(UsersContract.HOMESTEAD_NAME).setValue(homesteadName);
             return true;
 
         } else {

@@ -7,6 +7,8 @@ package com.spauldhaliwal.homestead;
 public class HomesteadsContract {
 
     static final String ROOT_NODE = "Homesteads";
+    static final String ID = "uId";
+    static final String NAME = "name";
     static final String JOBS_NODE = "Jobs";
     static final String NOTIFICATIONS = "_notifications";
 

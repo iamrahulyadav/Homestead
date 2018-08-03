@@ -21,6 +21,7 @@ public class UsersContract {
     static final String EMAIL = "email";
     static final String PROFILE_IMAGE = "profileImage";
     static final String HOMESTEAD_ID = "homesteadId";
+    static final String HOMESTEAD_NAME = "homesteadName";
     static final String NOTIFICATIONS = "notifications";
 
     /**

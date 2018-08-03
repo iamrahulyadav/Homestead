@@ -60,6 +60,7 @@ public class SignInActivity extends AppCompatActivity {
                             Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+                    editor.putString(UsersContract.HOMESTEAD_NAME, CurrentUser.getHomesteadName());
                     Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
                     editor.apply();
 
@@ -167,6 +168,7 @@ public class SignInActivity extends AppCompatActivity {
                                                 Context.MODE_PRIVATE);
                                         SharedPreferences.Editor editor = sharedPref.edit();
                                         editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+                                        editor.putString(UsersContract.HOMESTEAD_NAME, CurrentUser.getHomesteadName());
                                         editor.apply();
                                         Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
 

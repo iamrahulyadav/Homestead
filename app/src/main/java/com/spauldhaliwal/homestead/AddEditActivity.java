@@ -41,8 +41,6 @@ import java.util.List;
 
 public class AddEditActivity extends AppCompatActivity {
 
-    //TODO Fix claim/mark as finished functionality
-
     private static final String TAG = "AddEditActivity";
 
     public enum openMode {ADD, VIEW, AVAILABLE, CREATOR, OWNER}
@@ -174,13 +172,7 @@ public class AddEditActivity extends AppCompatActivity {
                     Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
 
                 }
-//                else if (job.getCreatorId().equals(CurrentUser.getUid())
-//                        && !job.getOwner().equals(CurrentUser.getUid())) {
-//                    //User is the creator of this job but not the claimant.
-//                    claimCompleteTaskCheckBox.setVisibility(View.GONE);
-//                    claimTaskTextView.setText("Task has been claimed.");
-//                    mMode = openMode.CREATOR;
-//}
+
                 else if (job.getOwner().equals(CurrentUser.getUid())) {
                     //User is the creator of this job and the claimant.
                     claimCompleteTaskCheckBox.setEnabled(true);
@@ -240,24 +232,6 @@ public class AddEditActivity extends AppCompatActivity {
                 }
             }
         });
-
-//        claimTaskCheckBox.setOnClickListener(new View.OnClickListener() {
-//            String name = editName.getText().toString();
-//            String description = editDescription.getText().toString();
-//
-//
-//            @Override
-//            public void onClick(View v) {
-//                jobStatus = JobsContract.STATUS_CLAIMED;
-//                jobOwner = CurrentUser.getUid();
-//                FirebaseResolver.updateJob(jobId,
-//                        name,
-//                        description,
-//                        jobStatus,
-//                        jobOwner,
-//                        jobScope);
-//            }
-//        });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
