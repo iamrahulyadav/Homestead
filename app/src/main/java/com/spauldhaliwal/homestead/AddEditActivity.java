@@ -314,6 +314,7 @@ public class AddEditActivity extends AppCompatActivity {
 
                     case AVAILABLE:
                         Log.d(TAG, "Save Button onClick: EditMode is: " + mMode);
+                        Toast.makeText(AddEditActivity.this, "marking as claimed", Toast.LENGTH_SHORT).show();
                         if (FirebaseResolver.updateJob(jobId,
                                 name,
                                 description,
@@ -324,10 +325,12 @@ public class AddEditActivity extends AppCompatActivity {
                         } else {
                             Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
                         }
+                        break;
 
                     case VIEW:
                         Log.d(TAG, "Save Button onClick: EditMode is: " + mMode + ". This should never happen," +
                                 " as the task is in " + mMode + " mode only and cannot be edited/claimed.");
+                        break;
 
                     case OWNER:
                         Log.d(TAG, "Save Button onClick: EditMode is: " + mMode);
@@ -341,7 +344,7 @@ public class AddEditActivity extends AppCompatActivity {
                                     CurrentUser.getUid(),
                                     jobScope);
                             finish();
-
+                            break;
                     }
 
                 }

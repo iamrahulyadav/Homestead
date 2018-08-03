@@ -18,8 +18,6 @@ import static android.app.Notification.DEFAULT_VIBRATE;
 
 public class FirebaseMessagingNotificationService extends FirebaseMessagingService {
 
-    //TODO Launch proper activity open opening notifications.
-
     private static final String TAG = "FirebaseMessagingNotifi";
 
     public void onMessageReceived(RemoteMessage remoteMessage) {
