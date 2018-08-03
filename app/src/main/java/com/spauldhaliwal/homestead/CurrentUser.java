@@ -1,6 +1,5 @@
 package com.spauldhaliwal.homestead;
 
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
