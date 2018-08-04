@@ -56,6 +56,7 @@ public class ChatActivity extends AppCompatActivity {
     private String lastMessageKey;
     private String messageKey;
     private String prevMessageKey;
+
     ChildEventListener childEventListener;
 
     private int moreMessagesLoadedCount = 0;
@@ -313,5 +314,17 @@ public class ChatActivity extends AppCompatActivity {
             default:
                 return super.onKeyLongPress(keyCode, event);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ActivityState.setActivity(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ActivityState.clearActivity(this);
     }
 }

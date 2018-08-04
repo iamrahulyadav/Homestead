@@ -474,4 +474,16 @@ public class AddEditActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ActivityState.setActivity(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ActivityState.clearActivity(this);
+    }
+
 }
