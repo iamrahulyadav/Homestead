@@ -54,9 +54,6 @@ public class AddEditActivity extends AppCompatActivity {
     private LinearLayoutManager linearLayoutManager;
 
     private final List<JobNote> notesList = new ArrayList<>();
-
-
-
     static String jobId;
     static int jobStatus;
     static String jobOwner;
@@ -271,7 +268,22 @@ public class AddEditActivity extends AppCompatActivity {
                                 Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
                             }
 
+                        } else if (claimCompleteTaskCheckBox.isChecked()) {
+                            Log.d(TAG, "Private edit save onClick: ");
+                        if (FirebaseResolver.updateJob(jobId,
+                                name,
+                                description,
+                                JobsContract.STATUS_CLOSED,
+                                CurrentUser.getUid(),
+                                jobScope)) {
+                            Toast.makeText(AddEditActivity.this, "Task was claimed by the " + mMode, Toast.LENGTH_SHORT).show();
+                            finish();
                         } else {
+                            Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+                        else {
                             if (FirebaseResolver.updateJob(jobId,
                                     name,
                                     description,

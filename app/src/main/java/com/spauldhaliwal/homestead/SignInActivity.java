@@ -155,6 +155,7 @@ public class SignInActivity extends AppCompatActivity {
 
                             if (dataSnapshot.hasChild(UsersContract.HOMESTEAD_ID)) {
                                 //User has a homesteadId
+                                Log.d(TAG, "onDataChange: user already has a homestead");
                                 ref.child(user.getUid())
                                         .child(UsersContract.TOKEN_ID)
                                         .setValue(FirebaseInstanceId.getInstance().getToken());
@@ -222,6 +223,8 @@ public class SignInActivity extends AppCompatActivity {
                                     }
                                 });
                             }
+                            Toast.makeText(mContext, "You have already joined a Homestead.", Toast.LENGTH_LONG).show();
+
 
                         } else {
                             // User doesn't have an account. Creating new one.

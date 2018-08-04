@@ -36,6 +36,7 @@ public abstract class FirebaseResolver {
                 String sortOrder = JobsContract.STATUS_CLAIMED + "_" + id;
 
                 job = new JobModel(id, name, description, creatorId, creatorImage, JobsContract.STATUS_CLAIMED, creatorId, isPrivate, sortOrder);
+                Log.d(TAG, "insertJob: job.toString: " + job.toString());
 
                 userRef.child(id).setValue(job);
                 Log.d(TAG, "insertJob: inserting " + job.toString());

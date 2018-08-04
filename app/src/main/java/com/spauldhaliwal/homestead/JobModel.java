@@ -23,13 +23,16 @@ class JobModel implements Serializable {
     public JobModel() {
     }
 
-    public JobModel(String id, String name, String description, String creatorId, String creatorIdImage , int status, String owner ,boolean isPrivate, String sortOrder) {
+    public JobModel(String id, String name, String description, String creatorId,
+                    String creatorIdImage , int status, String owner ,boolean isPrivate, String sortOrder) {
         this.id = id;
         this.name = name;
         this.creatorId = creatorId;
         this.creatorIdImage = creatorIdImage;
         this.description = description;
 //        this.dateAdded = dateAdded;
+        this.status = status;
+        this.owner = owner;
         this.isPrivate = isPrivate;
         this.sortOrder = sortOrder;
     }
@@ -38,6 +41,8 @@ class JobModel implements Serializable {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.status = status;
+        this.owner = owner;
         this.isPrivate = isPrivate;
     }
 
@@ -93,7 +98,7 @@ class JobModel implements Serializable {
                 ", status=" + status +
                 ", owner='" + owner + '\'' +
                 ", isPrivate=" + isPrivate +
+                ", sortOrder='" + sortOrder + '\'' +
                 '}';
     }
-
 }

@@ -13,7 +13,7 @@
         app:showAsAction="never" />
     <item
         android:id="@+id/menuChatItem"
-        android:icon="?android:attr/listChoiceIndicatorSingle"
+        android:icon="@drawable/chat_icon_24px"
         android:title="Chat"
         app:showAsAction="ifRoom" />
     <item
