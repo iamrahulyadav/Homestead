@@ -140,6 +140,10 @@ public class MainActivity extends AppCompatActivity {
                 String userId = CurrentUser.getUid();
                 String homesteadId = CurrentUser.getHomesteadUid();
                 String homesteadName = CurrentUser.getHomesteadName();
+                String inviteTitle = "Join " + CurrentUser.getName() + "'s Homestead!";
+                String inviteDescription = CurrentUser.getName() + " has invited you to join their homestead: " + CurrentUser.getHomesteadName() + ". Follow the link to accept their invitation!";
+                Uri inviteImageUrl = Uri.parse(CurrentUser.getProfileImage());
+
                 Task<ShortDynamicLink> dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
                         .setLink(Uri.parse("https://homesteadapp.com/?homesteadid=" + homesteadId
                                 + "&userid="
@@ -151,6 +155,11 @@ public class MainActivity extends AppCompatActivity {
                         // Open links with this app on iOS
                         .setIosParameters(new DynamicLink.IosParameters
                                 .Builder("com.spauldhaliwal.homestead").build())
+                        .setSocialMetaTagParameters(new DynamicLink.SocialMetaTagParameters.Builder()
+                        .setTitle(inviteTitle)
+                                .setDescription(inviteDescription)
+                                .setImageUrl(inviteImageUrl)
+                                .build())
                         .buildShortDynamicLink().addOnCompleteListener(this, new OnCompleteListener<ShortDynamicLink>() {
                             @Override
                             public void onComplete(@NonNull Task<ShortDynamicLink> task) {
