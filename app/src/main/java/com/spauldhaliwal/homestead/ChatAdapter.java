@@ -28,7 +28,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //    FirebaseRecyclerAdapter adapter;
     RecyclerView recyclerView;
 
-
+    //TODO Add VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING_ISOLATED viewType to hide profile image of grouped messages
 
     private static final int VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING = 0;
     private static final int VIEW_TYPE_MESSAGE_FIRST_MESSAGE_OUTGOING = 1;

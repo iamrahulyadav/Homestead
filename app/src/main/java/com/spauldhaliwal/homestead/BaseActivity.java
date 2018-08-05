@@ -57,7 +57,6 @@ public class BaseActivity extends AppCompatActivity {
         final Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setSubtitleTextColor(616161);
         setSupportActionBar(toolbar);
-        mContext = this;
         final ActionBar actionBar = getActionBar();
 
         Glide.with(this)
@@ -183,7 +182,6 @@ public class BaseActivity extends AppCompatActivity {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 FirebaseResolver.leaveHomestead();
-
                                 AuthUI.getInstance().signOut(mContext)
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
@@ -232,6 +230,7 @@ public class BaseActivity extends AppCompatActivity {
         super.onResume();
         ActivityState.setActivity(this);
         //Check if app is in first run
+        mContext = this;
         if (prefs.getBoolean("firstRun", true)) {
             beginOnBoarding();
             prefs.edit().putBoolean("firstRun", false).apply();

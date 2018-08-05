@@ -184,7 +184,6 @@ public class SignInActivity extends AppCompatActivity {
                                     }
                                 });
                             } else {
-                                Toast.makeText(SignInActivity.this, "User does not belong to any homestead.", Toast.LENGTH_LONG).show();
                                 FirebaseDynamicLinks.getInstance()
                                         .getDynamicLink(getIntent())
                                         .addOnSuccessListener(SignInActivity.this,
@@ -290,7 +289,7 @@ public class SignInActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
 
             } else if (resultCode == RESULT_CANCELED)
-                Toast.makeText(this, "Error joining homestead.", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "Error joining homestead.", Toast.LENGTH_SHORT).show();
             finish();
 
         } else {
