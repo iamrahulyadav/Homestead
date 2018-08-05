@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
 
     <android.support.v4.widget.Space
-        android:id="@+id/messageTopSpacer"
+        android:id="@+id/ougoingMessageTopSpacer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
@@ -27,7 +27,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/messageTopSpacer" />
+        app:layout_constraintTop_toTopOf="@id/ougoingMessageTopSpacer" />
 
     <TextView
         android:id="@+id/messageTimeStamp"

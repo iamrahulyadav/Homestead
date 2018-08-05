@@ -68,6 +68,7 @@ public abstract class FirebaseResolver {
                         DatabaseReference homesteadsJob = FirebaseDatabase
                                 .getInstance()
                                 .getReference(HomesteadsContract.ROOT_NODE)
+                                //bug
                                 .child(userHomesteadId)
                                 .child(HomesteadsContract.JOBS_NODE);
 

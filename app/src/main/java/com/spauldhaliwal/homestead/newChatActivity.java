@@ -175,6 +175,7 @@ public class newChatActivity extends BaseActivity {
             }
         });
 
+        super.onCreate(savedInstanceState);
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             private static final String TAG = "ChatActivity";
@@ -196,7 +197,6 @@ public class newChatActivity extends BaseActivity {
             }
         });
 
-        super.onCreate(savedInstanceState);
 
     }
 

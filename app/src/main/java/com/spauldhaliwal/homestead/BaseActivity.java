@@ -62,7 +62,7 @@ public class BaseActivity extends AppCompatActivity {
 
         Glide.with(this)
                 .load(CurrentUser.getProfileImage())
-                .apply(RequestOptions.circleCropTransform().override(65, 65))
+                .apply(RequestOptions.circleCropTransform().override(80, 80))
                 .into(new SimpleTarget<Drawable>() {
                     @Override
                     public void onResourceReady(@NonNull Drawable resource,

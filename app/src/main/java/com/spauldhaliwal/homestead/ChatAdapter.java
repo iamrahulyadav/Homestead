@@ -1,6 +1,5 @@
 package com.spauldhaliwal.homestead;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.widget.Space;
 import android.support.v7.widget.RecyclerView;
@@ -26,24 +25,26 @@ import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = "ChatAdapter";
-//    FirebaseRecyclerAdapter adapter;
+    //    FirebaseRecyclerAdapter adapter;
     RecyclerView recyclerView;
 
 //    private final ObservableSnapshotArray<MessageHolder> mSnapshots;
 
 
-    private static final int VIEW_TYPE_MESSAGE_FIRST_MESSAGE = 0;
-    private static final int VIEW_TYPE_MESSAGE_INCOMING = 1;
-    private static final int VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER = 2;
-    private static final int VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_SURROUNDED = 3;
-    private static final int VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST = 4;
-    private static final int VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST_FINAL = 5;
-    private static final int VIEW_TYPE_MESSAGE_INCOMING_ISOLATED = 6;
-    private static final int VIEW_TYPE_MESSAGE_INCOMING_ISOLATED_FINAL = 7;
-    private static final int VIEW_TYPE_MESSAGE_OUTGOING = 8;
-    private static final int VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER = 9;
+    private static final int VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING = 0;
+    private static final int VIEW_TYPE_MESSAGE_FIRST_MESSAGE_OUTGOING = 1;
+    private static final int VIEW_TYPE_MESSAGE_INCOMING = 2;
+    private static final int VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER = 3;
+    private static final int VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_SURROUNDED = 4;
+    private static final int VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST = 5;
+    private static final int VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST_FINAL = 6;
+    private static final int VIEW_TYPE_MESSAGE_INCOMING_ISOLATED = 7;
+    private static final int VIEW_TYPE_MESSAGE_INCOMING_ISOLATED_FINAL = 8;
+    private static final int VIEW_TYPE_MESSAGE_OUTGOING = 9;
+    private static final int VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER = 10;
 
-    private Set<Integer> incomingMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_INCOMING,
+    private Set<Integer> incomingMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING,
+            VIEW_TYPE_MESSAGE_INCOMING,
             VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER,
             VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_SURROUNDED,
             VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST,
@@ -51,7 +52,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             VIEW_TYPE_MESSAGE_INCOMING_ISOLATED,
             VIEW_TYPE_MESSAGE_INCOMING_ISOLATED_FINAL));
 
-    private Set<Integer> outgoingMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_FIRST_MESSAGE,
+    private Set<Integer> outgoingMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_FIRST_MESSAGE_OUTGOING,
             VIEW_TYPE_MESSAGE_OUTGOING,
             VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER));
 
@@ -86,8 +87,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         }
 
-        if (position == 0) {
-            return VIEW_TYPE_MESSAGE_FIRST_MESSAGE;
+        if (position == 0
+                && model.getSenderUid().equals(CurrentUser.getUid())) {
+            return VIEW_TYPE_MESSAGE_FIRST_MESSAGE_OUTGOING;
+        } else if (position == 0
+                && !model.getSenderUid().equals(CurrentUser.getUid())) {
+            return VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING;
         } else if ((position == this.getItemCount() - 1)
                 && !lastMessage.getSenderUid().equals(model.getSenderUid())
                 && !model.getSenderUid().equals(CurrentUser.getUid())) {
@@ -170,11 +175,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         switch (holder.getItemViewType()) {
 
-            case VIEW_TYPE_MESSAGE_FIRST_MESSAGE:
-                ((MessageHolder) holder).setMessage(model.getMessage());
-                ((MessageHolder) holder).incommingMessagePadding.setVisibility(View.INVISIBLE);
-                ((MessageHolder) holder).messageTopSpacer.setVisibility(View.INVISIBLE);
-
+            case VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING:
+                ((IncomingMessageHolder) holder).setMessage(model.getMessage());
+//                ((MessageHolder) holder).incommingMessagePadding.setVisibility(View.INVISIBLE);
+                ((IncomingMessageHolder) holder).messageTopSpacer.setVisibility(View.INVISIBLE);
+                ((IncomingMessageHolder) holder).setSenderName(model.getSenderName());
+                ((IncomingMessageHolder) holder).setProfileImage(model.getProfileImage());
                 ((MessageHolder) holder).setTimestamp(model.getTimeSent());
                 //                        Code to parse standalone emojis and make them larger.
                 message = model.getMessage();
@@ -314,6 +320,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    ((IncomingMessageHolder) holder).setContent(model.getMessage());
 //                }
                 break;
+            case VIEW_TYPE_MESSAGE_FIRST_MESSAGE_OUTGOING:
+                ((MessageHolder) holder).setMessage(model.getMessage());
+                ((MessageHolder) holder).incommingMessagePadding.setVisibility(View.INVISIBLE);
+                ((MessageHolder) holder).messageTopSpacer.setVisibility(View.INVISIBLE);
+
+                ((MessageHolder) holder).setTimestamp(model.getTimeSent());
+                //                        Code to parse standalone emojis and make them larger.
+                message = model.getMessage();
+                break;
             case VIEW_TYPE_MESSAGE_OUTGOING:
                 ((OutgoingMessageHolder) holder).setMessage(model.getMessage());
                 ((MessageHolder) holder).incommingMessagePadding.setVisibility(View.INVISIBLE);
@@ -380,7 +395,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             timestamp = itemView.findViewById(R.id.messageTimeStamp);
             profileImage = itemView.findViewById(R.id.messageSenderProfileImage);
             incommingMessagePadding = itemView.findViewById(R.id.incommingMessagePadding);
-            messageTopSpacer = itemView.findViewById(R.id.messageTopSpacer);
+            messageTopSpacer = itemView.findViewById(R.id.ougoingMessageTopSpacer);
             messageBackground = itemView.findViewById(R.id.messageBackground);
         }
 
@@ -459,6 +474,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final TextView senderName;
         private final TextView timestamp;
         private final ImageView profileImage;
+        private Space messageTopSpacer;
 
         IncomingMessageHolder(View itemView) {
             super(itemView);
@@ -468,6 +484,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             senderName = itemView.findViewById(R.id.messageSenderName);
             timestamp = itemView.findViewById(R.id.messageTimeStamp);
             profileImage = itemView.findViewById(R.id.messageSenderProfileImage);
+            messageTopSpacer = itemView.findViewById(R.id.incomingMessageTopSpacer);
 
         }
 
