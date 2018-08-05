@@ -50,7 +50,8 @@ public class PersonalBoardFragment extends Fragment {
                 .getReference()
                 .child(UsersContract.ROOT_NODE)
                 .child(userUid)
-                .child(UsersContract.JOBS_NODE);
+                .child(UsersContract.JOBS_NODE)
+                .orderByChild(JobsContract.SORT_ORDER);
 
         FirebaseRecyclerOptions<JobModel> options =
                 new FirebaseRecyclerOptions.Builder<JobModel>()

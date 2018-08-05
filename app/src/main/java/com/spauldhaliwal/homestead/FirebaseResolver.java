@@ -125,6 +125,11 @@ public abstract class FirebaseResolver {
                 userRef.child(uid).child(JobsContract.STATUS).setValue(job.getStatus());
                 userRef.child(uid).child(JobsContract.OWNER).setValue(job.getOwner());
 
+                if (status == JobsContract.STATUS_CLOSED) {
+                    String sortOrder = JobsContract.STATUS_CLOSED + "_" + uid;
+                    userRef.child(uid).child(JobsContract.SORT_ORDER).setValue(sortOrder);
+                }
+
                 Log.d(TAG, "updateJob: updating " + job.toString());
                 return true;
             }
