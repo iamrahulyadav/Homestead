@@ -160,8 +160,6 @@ public class AddEditActivity extends AppCompatActivity {
                     editDescription.setKeyListener(null);
                     deleteButon.setVisibility(View.GONE);
                     mMode = openMode.AVAILABLE;
-                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
-
 
                 }  else if (job.getCreatorId().equals(CurrentUser.getUid())) {
                     // User is the creator of this job and it has not been claimed yet. Can still
@@ -170,7 +168,6 @@ public class AddEditActivity extends AppCompatActivity {
                     editDescription.setKeyListener(editDescriptionKeyListener);
                     deleteButon.setVisibility(View.VISIBLE);
                     mMode = openMode.CREATOR;
-                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
 
                 }
 
@@ -189,14 +186,12 @@ public class AddEditActivity extends AppCompatActivity {
                     claimTaskTextView.setText("Mark as complete");
                     saveButton.setVisibility(View.VISIBLE);
                     mMode = openMode.OWNER;
-                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
 
                 } else if (!job.getOwner().equals(CurrentUser.getUid())) {
                     // User is not the claimant of this task.
                     claimCompleteTaskCheckBox.setVisibility(View.GONE);
                     claimTaskTextView.setText("Task has been claimed");
                     mMode = openMode.VIEW;
-                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
 
                 }
 
@@ -206,7 +201,6 @@ public class AddEditActivity extends AppCompatActivity {
                     saveButton.setVisibility(View.VISIBLE);
                     claimTaskTextView.setText("Mark as complete");
                     mMode = openMode.OWNER;
-                    Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
                 }
             } else if (job.getStatus() == JobsContract.STATUS_CLOSED) {
                 // Task has been completed.
@@ -219,7 +213,6 @@ public class AddEditActivity extends AppCompatActivity {
                 claimTaskTextView.setText("Task has been completed");
                 addNoteButton.setEnabled(false);
                 mMode = openMode.VIEW;
-                Toast.makeText(AddEditActivity.this, "Opening task as: " + mMode, Toast.LENGTH_LONG).show();
 
             }
 
@@ -292,7 +285,6 @@ public class AddEditActivity extends AppCompatActivity {
                                     JobsContract.STATUS_CLAIMED,
                                     CurrentUser.getUid(),
                                     jobScope)) {
-                                Toast.makeText(AddEditActivity.this, "Task was claimed by the " + mMode, Toast.LENGTH_SHORT).show();
                                 finish();
                             } else {
                                 Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
@@ -306,7 +298,6 @@ public class AddEditActivity extends AppCompatActivity {
                                 JobsContract.STATUS_CLOSED,
                                 CurrentUser.getUid(),
                                 jobScope)) {
-                            Toast.makeText(AddEditActivity.this, "Task was claimed by the " + mMode, Toast.LENGTH_SHORT).show();
                             finish();
                         } else {
                             Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
@@ -320,7 +311,6 @@ public class AddEditActivity extends AppCompatActivity {
                                     jobStatus,
                                     jobOwner,
                                     jobScope)) {
-                                Toast.makeText(AddEditActivity.this, "Task was edited but not claimed", Toast.LENGTH_SHORT).show();
                                 finish();
                             } else {
                                 Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
@@ -330,7 +320,6 @@ public class AddEditActivity extends AppCompatActivity {
 
                     case AVAILABLE:
                         Log.d(TAG, "Save Button onClick: EditMode is: " + mMode);
-                        Toast.makeText(AddEditActivity.this, "marking as claimed", Toast.LENGTH_SHORT).show();
                         if (FirebaseResolver.updateJob(jobId,
                                 name,
                                 description,
