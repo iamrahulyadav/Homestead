@@ -469,15 +469,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             timestamp = itemView.findViewById(R.id.messageTimeStamp);
             profileImage = itemView.findViewById(R.id.messageSenderProfileImage);
 
-
-            profileImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(profileImage.getContext(), AddEditActivity.class);
-                    profileImage.getContext().startActivity(intent);
-
-                }
-            });
         }
 
         public TextView getMessage() {

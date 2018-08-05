@@ -5,6 +5,9 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -12,12 +15,15 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +34,9 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.firebase.ui.auth.AuthUI;
+import com.getkeepsafe.taptargetview.TapTarget;
+import com.getkeepsafe.taptargetview.TapTargetSequence;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,22 +50,25 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
+    SharedPreferences prefs = null;
     Vibrator vibe;
 
     // When requested, this adapter returns a HomeBoardFragment,
     // representing an object in the collection.
     ViewPager mViewPager;
     HomesteadBoardPagerAdapter mAdapter;
+    Drawable userProfileDrawable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity onCreate: starts");
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        prefs = getSharedPreferences("com.spauldhaliwal.homestead", MODE_PRIVATE);
 
         final FirebaseAuth auth = FirebaseAuth.getInstance();
 
         setContentView(R.layout.activity_main);
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setSubtitleTextColor(616161);
         setSupportActionBar(toolbar);
 
@@ -65,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         FloatingActionButton fab = findViewById(R.id.fab);
+        Log.d(TAG, "onCreate: chatMenuId: " + R.id.menuChatItem);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,24 +88,23 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-            //Set overflow icon to user's profile image
-            Glide.with(this)
-                    .load(CurrentUser.getProfileImage())
-                    .apply(RequestOptions.circleCropTransform().override(65, 65))
-                    .into(new SimpleTarget<Drawable>() {
-                        @Override
-                        public void onResourceReady(@NonNull Drawable resource,
-                                                    @Nullable Transition<? super Drawable> transition) {
-                            toolbar.setOverflowIcon(resource);
-                        }
-                    });
+        //Set overflow icon to user's profile image
+        Glide.with(this)
+                .load(CurrentUser.getProfileImage())
+                .apply(RequestOptions.circleCropTransform().override(65, 65))
+                .into(new SimpleTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource,
+                                                @Nullable Transition<? super Drawable> transition) {
+                        userProfileDrawable = resource;
+                        toolbar.setOverflowIcon(userProfileDrawable);
+                    }
+                });
 
-            mAdapter = new HomesteadBoardPagerAdapter(getSupportFragmentManager());
-            mViewPager = findViewById(R.id.content_pager);
-            mViewPager.setAdapter(mAdapter);
-            mAdapter.notifyDataSetChanged();
-
-
+        mAdapter = new HomesteadBoardPagerAdapter(getSupportFragmentManager());
+        mViewPager = findViewById(R.id.content_pager);
+        mViewPager.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
         super.onCreate(savedInstanceState);
     }
 
@@ -156,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                         .setIosParameters(new DynamicLink.IosParameters
                                 .Builder("com.spauldhaliwal.homestead").build())
                         .setSocialMetaTagParameters(new DynamicLink.SocialMetaTagParameters.Builder()
-                        .setTitle(inviteTitle)
+                                .setTitle(inviteTitle)
                                 .setDescription(inviteDescription)
                                 .setImageUrl(inviteImageUrl)
                                 .build())
@@ -247,11 +259,74 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         ActivityState.setActivity(this);
+
+        //Check if app is in first run
+        if (prefs.getBoolean("firstRun", true)) {
+            beginOnBoarding();
+            prefs.edit().putBoolean("firstRun", false).apply();
+
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         ActivityState.clearActivity(this);
+    }
+
+    public void beginOnBoarding() {
+        final Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.inflateMenu(R.menu.menu_main);
+        Drawable homesteadIcon = getResources().getDrawable(R.drawable.homestead_launcher);
+        Display display = getWindowManager().getDefaultDisplay();
+        final Point size = new Point();
+        display.getSize(size);
+        int centerX = size.x;
+
+        int centerY = size.y;
+        Log.d(TAG, "beginOnBoarding: centerX: " + centerX);
+        Rect rect = new Rect(centerX, 0, 0, centerY);
+
+
+        TapTargetSequence onBoardingSequence = new TapTargetSequence(this).targets(
+                TapTarget.forView(findViewById(R.id.fab), "Tap here to create a new task.", "You can make it either public, and share it with your Homestead, or private.")
+                        .outerCircleColor(R.color.colorAccent)
+                        .tintTarget(false)
+                        .cancelable(false)
+                ,
+                TapTarget.forToolbarMenuItem(toolbar, R.id.menuChatItem, "Tap here to access Homestead Chat.", "You'll be able to chat with the other members of your Homestead")
+                        .outerCircleColor(R.color.colorAccent)
+                        .tintTarget(false)
+                        .cancelable(false)
+                ,
+                TapTarget.forToolbarOverflow(toolbar, "Tap here to access your menu.")
+                        .outerCircleColor(R.color.colorAccent)
+                        .tintTarget(false)
+                        .cancelable(false)
+                ,
+                TapTarget.forBounds(rect, "Thank you for choosing Homestead.", "Tap here to begin.")
+                        .icon(homesteadIcon)
+                        .outerCircleColor(R.color.colorAccent)
+                        .tintTarget(false)
+                        .cancelable(false))
+                .listener(new TapTargetSequence.Listener() {
+                    @Override
+                    public void onSequenceFinish() {
+
+                    }
+
+                    @Override
+                    public void onSequenceStep(TapTarget lastTarget, boolean targetClicked) {
+
+                    }
+
+                    @Override
+                    public void onSequenceCanceled(TapTarget lastTarget) {
+
+                    }
+                });
+
+        onBoardingSequence.start();
+
     }
 }
