@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.spauldhaliwal.homestead.MainActivity">
     <item
+        android:id="@+id/menuChatItem"
+        android:icon="@drawable/chat_icon_24px"
+        android:title="Chat"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/menuInvite"
         android:title="Invite"
         app:showAsAction="never" />
@@ -12,12 +17,11 @@
         android:title="Sign Out"
         app:showAsAction="never" />
     <item
-        android:id="@+id/menuChatItem"
-        android:icon="@drawable/chat_icon_24px"
-        android:title="Chat"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/menuLeaveHomestead"
         android:title="Leave Homestead"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menuTutorial"
+        android:title="Play Tutorial"
         app:showAsAction="never" />
 </menu>

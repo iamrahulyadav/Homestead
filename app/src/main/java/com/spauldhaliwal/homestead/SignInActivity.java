@@ -223,8 +223,6 @@ public class SignInActivity extends AppCompatActivity {
                                     }
                                 });
                             }
-                            Toast.makeText(mContext, "You have already joined a Homestead.", Toast.LENGTH_LONG).show();
-
 
                         } else {
                             // User doesn't have an account. Creating new one.

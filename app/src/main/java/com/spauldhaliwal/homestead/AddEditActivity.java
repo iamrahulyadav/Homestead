@@ -3,11 +3,16 @@ package com.spauldhaliwal.homestead;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +31,10 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -35,11 +44,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AddEditActivity extends AppCompatActivity {
+    //TODO extend BaseActivity, clean up code
 
     private static final String TAG = "AddEditActivity";
 
@@ -52,7 +65,7 @@ public class AddEditActivity extends AppCompatActivity {
     RecyclerView jobNoteRecyclerView;
     JobNotesRecyclerAdapter jobNotesRecyclerAdapter;
     private LinearLayoutManager linearLayoutManager;
-
+    private Context mContext;
     private final List<JobNote> notesList = new ArrayList<>();
     static String jobId;
     static int jobStatus;
@@ -61,16 +74,20 @@ public class AddEditActivity extends AppCompatActivity {
 
     private openMode mMode;
 
+    Drawable userProfileDrawable;
+
+
     Dialog addNoteDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         setContentView(R.layout.task_details);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-
+        final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         jobsDatabseReference = FirebaseDatabase.getInstance().getReference(JobsContract.ROOT_NODE);
         homesteadsDatabaseReerence = FirebaseDatabase.getInstance().getReference(HomesteadsContract.ROOT_NODE);
@@ -107,6 +124,19 @@ public class AddEditActivity extends AppCompatActivity {
         jobNoteRecyclerView.setLayoutManager(linearLayoutManager);
 
         jobNoteRecyclerView.setAdapter(jobNotesRecyclerAdapter);
+
+        //Set overflow icon to user's profile image
+        Glide.with(this)
+                .load(CurrentUser.getProfileImage())
+                .apply(RequestOptions.circleCropTransform().override(65, 65))
+                .into(new SimpleTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource,
+                                                @Nullable Transition<? super Drawable> transition) {
+                        userProfileDrawable = resource;
+                        toolbar.setOverflowIcon(userProfileDrawable);
+                    }
+                });
 
         if (privacySwitch.isChecked()) {
             privacyText.setText(JobsContract.PRIVATE);
@@ -425,8 +455,13 @@ public class AddEditActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+
         switch (id) {
             case (R.id.action_signout):
                 AuthUI.getInstance().signOut(this)
@@ -436,13 +471,13 @@ public class AddEditActivity extends AppCompatActivity {
                                 // User is now signed out
                                 if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
                                     ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
-                                            .clearApplicationUserData();
+                                            .clearApplicationUserData(); // note: it has a return value!
                                 } else {
                                     // use old hacky way, which can be removed
                                     // once minSdkVersion goes above 19 in a few years.
-                                    Log.d(TAG, "onComplete: Application is <kitkat.");
+                                    Log.d(TAG, "onComplete: Application is pre kitkat.");
                                 }
-                                Intent intent = new Intent(AddEditActivity.this, MainActivity.class);
+                                Intent intent = new Intent(mContext, MainActivity.class);
                                 startActivity(intent);
                                 finish();
                                 recreate();
@@ -450,10 +485,98 @@ public class AddEditActivity extends AppCompatActivity {
                             }
                         });
                 return true;
+            case android.R.id.home:
+                finish();
+                return true;
+            case (R.id.menuTutorial):
+                //Disabled for now
+                invalidateOptionsMenu();
+                return true;
+            case (R.id.menuInvite):
+                String userId = CurrentUser.getUid();
+                String homesteadId = CurrentUser.getHomesteadUid();
+                String homesteadName = CurrentUser.getHomesteadName();
+                String inviteTitle = "Join " + CurrentUser.getName() + "'s Homestead!";
+                String inviteDescription = CurrentUser.getName() + " has invited you to join their homestead: " + CurrentUser.getHomesteadName() + ". Follow the link to accept their invitation!";
+                Uri inviteImageUrl = Uri.parse(CurrentUser.getProfileImage());
+
+                Task<ShortDynamicLink> dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
+                        .setLink(Uri.parse("https://homesteadapp.com/?homesteadid=" + homesteadId
+                                + "&userid="
+                                + userId))
+
+                        .setDynamicLinkDomain("homesteadapp.page.link")
+                        // Open links with this app on android
+                        .setAndroidParameters(new DynamicLink.AndroidParameters.Builder().build())
+                        // Open links with this app on iOS
+                        .setIosParameters(new DynamicLink.IosParameters
+                                .Builder("com.spauldhaliwal.homestead").build())
+                        .setSocialMetaTagParameters(new DynamicLink.SocialMetaTagParameters.Builder()
+                                .setTitle(inviteTitle)
+                                .setDescription(inviteDescription)
+                                .setImageUrl(inviteImageUrl)
+                                .build())
+                        .buildShortDynamicLink().addOnCompleteListener(this, new OnCompleteListener<ShortDynamicLink>() {
+                            @Override
+                            public void onComplete(@NonNull Task<ShortDynamicLink> task) {
+                                if (task.isSuccessful()) {
+                                    // Short Link created
+                                    Uri shortDynamicLinkUri = task.getResult().getShortLink();
+                                    Uri flowchartLink = task.getResult().getPreviewLink();
+
+                                    Log.d(TAG, "onOptionsItemSelected: inviteUri: " + shortDynamicLinkUri);
+
+                                    Intent intent = new Intent(Intent.ACTION_SEND);
+                                    intent.setType("text/plain");
+                                    intent.putExtra(Intent.EXTRA_SUBJECT, "Invite URL");
+                                    intent.putExtra(Intent.EXTRA_TEXT, shortDynamicLinkUri.toString());
+                                    startActivity(Intent.createChooser(intent, "Invite URL"));
+
+                                } else {
+                                    // Error
+                                    // ...
+                                }
+
+                            }
+                        });
+
+                return true;
             case (R.id.menuChatItem):
                 Intent intent = new Intent(this, ChatActivity.class);
                 startActivity(intent);
                 return true;
+            case (R.id.menuLeaveHomestead):
+                new AlertDialog.Builder(this)
+                        .setTitle("Leave Homestead")
+                        .setMessage("Are you sure you want to leave this Homestead?")
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                FirebaseResolver.leaveHomestead();
+
+                                AuthUI.getInstance().signOut(mContext)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                // User is now signed out
+                                                if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
+                                                    ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
+                                                            .clearApplicationUserData(); // note: it has a return value!
+                                                } else {
+                                                    // use old hacky way, which can be removed
+                                                    // once minSdkVersion goes above 19 in a few years.
+                                                    Log.d(TAG, "onComplete: Application is pre kitkat.");
+                                                }
+                                                Intent intent = new Intent(mContext, MainActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                                recreate();
+
+                                            }
+                                        });
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null).show();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -478,12 +601,21 @@ public class AddEditActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         ActivityState.setActivity(this);
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        mContext = null;
         ActivityState.clearActivity(this);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.menuTutorial).setEnabled(false).setVisible(false);
+        invalidateOptionsMenu();
+        return super.onPrepareOptionsMenu(menu);
     }
 
 }
