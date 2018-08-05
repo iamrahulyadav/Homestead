@@ -28,7 +28,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //    FirebaseRecyclerAdapter adapter;
     RecyclerView recyclerView;
 
-//    private final ObservableSnapshotArray<MessageHolder> mSnapshots;
 
 
     private static final int VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING = 0;
