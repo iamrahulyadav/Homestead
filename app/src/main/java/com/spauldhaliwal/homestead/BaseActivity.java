@@ -41,17 +41,20 @@ import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
+    private static final String TAG = "BaseActivity";
 
     SharedPreferences prefs = null;
     Vibrator vibe;
     Drawable userProfileDrawable;
-    private static final String TAG = "BaseActivity";
     Context mContext;
+    Toolbar toolbar;
 
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(getLayoutId());
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         prefs = getSharedPreferences("com.spauldhaliwal.homestead", MODE_PRIVATE);
         final Toolbar toolbar = findViewById(R.id.toolbar);
@@ -70,9 +73,6 @@ public class BaseActivity extends AppCompatActivity {
                         toolbar.setOverflowIcon(userProfileDrawable);
                     }
                 });
-
-        super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -84,13 +84,7 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-
         switch (id) {
             case (R.id.action_signout):
                 AuthUI.getInstance().signOut(this)
@@ -171,7 +165,7 @@ public class BaseActivity extends AppCompatActivity {
 
                 return true;
             case (R.id.menuChatItem):
-                Intent intent = new Intent(this, ChatActivity.class);
+                Intent intent = new Intent(this, newChatActivity.class);
                 startActivity(intent);
                 return true;
             case (R.id.menuLeaveHomestead):
@@ -248,7 +242,7 @@ public class BaseActivity extends AppCompatActivity {
     public void beginOnBoarding() {
         if (!ActivityState.getCurrentActivity().getClass().getSimpleName().equals(MainActivity.class.getSimpleName())) {
             prefs.edit().remove("firstRun").apply();
-            Intent intent = new Intent(mContext, MainActivity.class);
+            Intent intent = new Intent(mContext, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
             finish();
         } else {
@@ -315,6 +309,8 @@ public class BaseActivity extends AppCompatActivity {
             onBoardingSequence.start();
         }
     }
+
+    protected abstract int getLayoutId();
 
 
 }

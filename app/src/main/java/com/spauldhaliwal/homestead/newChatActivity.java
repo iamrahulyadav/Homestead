@@ -1,9 +1,13 @@
 package com.spauldhaliwal.homestead;
 
+import android.app.ActivityManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
@@ -13,6 +17,7 @@ import android.support.transition.Fade;
 import android.support.transition.Transition;
 import android.support.transition.TransitionManager;
 import android.support.transition.TransitionSet;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,22 +35,28 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class newChatActivity extends BaseActivity {
-
-    //TODO find out why send button is disapearing
-    private static final String TAG = "ChatActivity";
+    //TODO extend BaseActivity, clean up code
+    private static final String TAG = "newChatActivity";
 
     private ChatAdapter chatAdapter;
+    Context mContext;
 
     RecyclerView messageListView;
     private LinearLayoutManager linearLayoutManager;
@@ -79,21 +90,16 @@ public class newChatActivity extends BaseActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         SharedPreferences sharedPref = this.getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
                 Context.MODE_PRIVATE);
         homesteadId = sharedPref.getString(UsersContract.HOMESTEAD_ID, null);
 
-//        vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        setContentView(R.layout.chat_view);
-        final Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setSubtitleTextColor(616161);
-        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Homestead Chat");
         getSupportActionBar().setDisplayShowHomeEnabled(false);
 
         ImageButton sendButton = findViewById(R.id.chatSendButton);
-        sendButton.setVisibility(View.VISIBLE);
         final EditText editMessage = findViewById(R.id.chatMessage);
 
         messageListView = findViewById(R.id.chatRecyclerView);
@@ -107,19 +113,6 @@ public class newChatActivity extends BaseActivity {
 
         chatAdapter = new ChatAdapter(messagesList);
         messageListView.setAdapter(chatAdapter);
-
-        //Set overflow icon to user's profile image
-//        Glide.with(this)
-//                .load(CurrentUser.getProfileImage())
-//                .apply(RequestOptions.circleCropTransform().override(65, 65))
-//                .into(new SimpleTarget<Drawable>() {
-//                    @Override
-//                    public void onResourceReady(@NonNull Drawable resource,
-//                                                @Nullable com.bumptech.glide.request.transition.Transition<? super Drawable> transition) {
-//                        userProfileDrawable = resource;
-//                        toolbar.setOverflowIcon(userProfileDrawable);
-//                    }
-//                });
 
         //Endless scroll code
 //        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -175,7 +168,14 @@ public class newChatActivity extends BaseActivity {
             }
         });
 
-        super.onCreate(savedInstanceState);
+        ItemClickSupport.addTo(messageListView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+                Toast.makeText(mContext, "longClickListener activated.", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             private static final String TAG = "ChatActivity";
@@ -196,7 +196,6 @@ public class newChatActivity extends BaseActivity {
                 }
             }
         });
-
 
     }
 
@@ -323,13 +322,7 @@ public class newChatActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case (R.id.menuTutorial):
-                finish();
-                super.onOptionsItemSelected(item);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
+    protected int getLayoutId() {
+        return R.layout.chat_view;
     }
 }

@@ -34,6 +34,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
@@ -49,26 +50,21 @@ import com.google.firebase.dynamiclinks.ShortDynamicLink;
 public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
-
-//    SharedPreferences prefs = null;
-    Vibrator vibe;
     ViewPager mViewPager;
     HomesteadBoardPagerAdapter mAdapter;
-    Drawable userProfileDrawable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "MainActivity onCreate: starts");
-//        prefs = getSharedPreferences("com.spauldhaliwal.homestead", MODE_PRIVATE);
-
-        setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState);
         FloatingActionButton fab = findViewById(R.id.fab);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddEditActivity.class);
+                Intent intent = new Intent(MainActivity.this, AddEditActivityNew.class);
                 startActivity(intent);
+
             }
         });
 
@@ -76,6 +72,10 @@ public class MainActivity extends BaseActivity {
         mViewPager = findViewById(R.id.content_pager);
         mViewPager.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
-        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.activity_main;
     }
 }

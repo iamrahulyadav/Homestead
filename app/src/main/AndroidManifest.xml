@@ -47,6 +47,15 @@
                 <action android:name="anroid.intent.action.MAIN" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".AddEditActivityNew"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
 
         <service android:name=".FirebaseMessagingNotificationService">
             <intent-filter>
