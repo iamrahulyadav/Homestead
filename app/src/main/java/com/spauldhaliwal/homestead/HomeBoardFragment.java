@@ -76,7 +76,7 @@ public class HomeBoardFragment extends Fragment {
             @Override
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
 
-                Intent intent = new Intent(getActivity(), AddEditActivity.class);
+                Intent intent = new Intent(getActivity(), newAddEditActivity.class);
                 JobModel job = firebaseAdapter.getItem(position);
                 intent.putExtra(JobsContract.ROOT_NODE, job);
                 startActivity(intent);

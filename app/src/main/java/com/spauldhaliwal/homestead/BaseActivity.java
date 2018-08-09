@@ -114,7 +114,6 @@ public abstract class BaseActivity extends AppCompatActivity {
                 finish();
                 return true;
             case (R.id.menuTutorial):
-                invalidateOptionsMenu();
                 beginOnBoarding();
                 return true;
             case (R.id.menuInvite):
@@ -248,21 +247,24 @@ public abstract class BaseActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            final Toolbar toolbar = findViewById(R.id.toolbar);
-            toolbar.inflateMenu(R.menu.menu_main);
+            //Check to see if toolbar is inflated, if not re-inflate.
+            if (findViewById(R.id.menuChatItem) == null) {
+                invalidateOptionsMenu();
+                toolbar = findViewById(R.id.toolbar);
+                toolbar.inflateMenu(R.menu.menu_main);
+            }
+
             Drawable homesteadIcon = getResources().getDrawable(R.drawable.homestead_launcher);
             Display display = getWindowManager().getDefaultDisplay();
-            final Point size = new Point();
+            Point size = new Point();
             display.getSize(size);
             int centerX = size.x;
 
             int centerY = size.y;
-            Log.d(TAG, "beginOnBoarding: centerX: " + centerX);
             Rect rect = new Rect(centerX, 0, 0, centerY);
 
-
             final TapTargetSequence onBoardingSequence = new TapTargetSequence(this).targets(
-                    TapTarget.forView(findViewById(R.id.fab), "Tap here to create a new task.", "You can make it either public, and share it with your Homestead, or private.")
+                    TapTarget.forView(findViewById(R.id.fab), "Tap here to create a new task.", "You can make it either public, and share it with your Homestead, or keep it private.")
                             .outerCircleColor(R.color.colorAccent)
                             .tintTarget(false)
                             .cancelable(false)

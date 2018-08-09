@@ -24,12 +24,15 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -91,6 +94,7 @@ public class newChatActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
         SharedPreferences sharedPref = this.getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
                 Context.MODE_PRIVATE);
         homesteadId = sharedPref.getString(UsersContract.HOMESTEAD_ID, null);
@@ -98,8 +102,6 @@ public class newChatActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Homestead Chat");
         getSupportActionBar().setDisplayShowHomeEnabled(false);
-        Log.d(TAG, "Toolbar onCreate: ChatActivity Toolbar: " + toolbar);
-
 
         ImageButton sendButton = findViewById(R.id.chatSendButton);
         final EditText editMessage = findViewById(R.id.chatMessage);
@@ -110,6 +112,8 @@ public class newChatActivity extends BaseActivity {
         linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         messageListView.setLayoutManager(linearLayoutManager);
+        registerForContextMenu(messageListView);
+
 
         ((SimpleItemAnimator) messageListView.getItemAnimator()).setSupportsChangeAnimations(false);
 
@@ -173,6 +177,7 @@ public class newChatActivity extends BaseActivity {
         ItemClickSupport.addTo(messageListView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+
                 Toast.makeText(mContext, "longClickListener activated.", Toast.LENGTH_SHORT).show();
                 return true;
             }
@@ -326,5 +331,25 @@ public class newChatActivity extends BaseActivity {
     @Override
     protected int getLayoutId() {
         return R.layout.chat_view;
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.chat_view_context_menu, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.chatViewContextItemCopyText:
+                Toast.makeText(mContext, "Copy Text Selected", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+
     }
 }

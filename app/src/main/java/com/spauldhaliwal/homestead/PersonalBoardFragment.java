@@ -67,7 +67,7 @@ public class PersonalBoardFragment extends Fragment {
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                 Log.d(TAG, "onItemClick: item clicked with position " + position + " and id " + position);
 
-                Intent intent = new Intent(getActivity(), AddEditActivity.class);
+                Intent intent = new Intent(getActivity(), newAddEditActivity.class);
 
                 JobModel job = firebaseAdapter.getItem(position);
                 Log.d(TAG, "onItemClicked Private: jobId is " + job);
