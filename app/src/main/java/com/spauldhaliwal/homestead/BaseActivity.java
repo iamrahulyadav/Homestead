@@ -48,7 +48,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     Vibrator vibe;
     Drawable userProfileDrawable;
     Context mContext;
-    Toolbar toolbar;
+    static Toolbar toolbar;
 
 
     @Override
@@ -57,10 +57,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         setContentView(getLayoutId());
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         prefs = getSharedPreferences("com.spauldhaliwal.homestead", MODE_PRIVATE);
-        final Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         toolbar.setSubtitleTextColor(616161);
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getActionBar();
+        Log.d(TAG, "Toolbar onCreate: BaseActivity Toolbar: " + toolbar);
+
 
         Glide.with(this)
                 .load(CurrentUser.getProfileImage())

@@ -99,11 +99,11 @@ public class ChatActivity extends AppCompatActivity {
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         setContentView(R.layout.chat_view);
         final Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setSubtitleTextColor(616161);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Homestead Chat");
         getSupportActionBar().setDisplayShowHomeEnabled(false);
+        Log.d(TAG, "Toolbar onCreate: ChatActivity Toolbar: " + toolbar);
 
         ImageButton sendButton = findViewById(R.id.chatSendButton);
         final EditText editMessage = findViewById(R.id.chatMessage);

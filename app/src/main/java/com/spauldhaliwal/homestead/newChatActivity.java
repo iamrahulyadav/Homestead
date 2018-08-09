@@ -98,6 +98,8 @@ public class newChatActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Homestead Chat");
         getSupportActionBar().setDisplayShowHomeEnabled(false);
+        Log.d(TAG, "Toolbar onCreate: ChatActivity Toolbar: " + toolbar);
+
 
         ImageButton sendButton = findViewById(R.id.chatSendButton);
         final EditText editMessage = findViewById(R.id.chatMessage);
