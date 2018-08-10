@@ -187,13 +187,13 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        ItemClickSupport.addTo(messageListView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-                Toast.makeText(mContext, "longClickListener activated.", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
+//        ItemClickSupport.addTo(messageListView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
+//            @Override
+//            public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+//                Toast.makeText(mContext, "longClickListener activated.", Toast.LENGTH_SHORT).show();
+//                return true;
+//            }
+//        });
 
 
         sendButton.setOnClickListener(new View.OnClickListener() {

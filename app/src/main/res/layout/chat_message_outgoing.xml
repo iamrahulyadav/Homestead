@@ -5,6 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <TextView
+        android:id="@+id/messageTimeStamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Timestamp"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/incommingMessagePadding" />
+
     <android.support.v4.widget.Space
         android:id="@+id/ougoingMessageTopSpacer"
         android:layout_width="0dp"
@@ -28,18 +40,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/ougoingMessageTopSpacer" />
-
-    <TextView
-        android:id="@+id/messageTimeStamp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Timestamp"
-        android:textSize="12sp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/incommingMessagePadding" />
 
     <TextView
         android:id="@+id/messageOutgoingView"

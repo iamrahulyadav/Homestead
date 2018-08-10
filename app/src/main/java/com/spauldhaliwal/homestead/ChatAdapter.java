@@ -1,15 +1,28 @@
 package com.spauldhaliwal.homestead;
 
+import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.transition.AutoTransition;
+import android.support.transition.ChangeBounds;
+import android.support.transition.Fade;
+import android.support.transition.Transition;
+import android.support.transition.TransitionManager;
+import android.support.transition.TransitionSet;
 import android.support.v4.widget.Space;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -25,8 +38,6 @@ import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = "ChatAdapter";
-    //    FirebaseRecyclerAdapter adapter;
-    RecyclerView recyclerView;
 
     //TODO Add VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING_ISOLATED viewType to hide profile image of grouped messages
 
@@ -62,6 +73,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public ChatAdapter(List<MessageModel> messagesList) {
         this.messagesList = messagesList;
     }
+
+    static RecyclerView mRecyclerView;
 
     @Override
     public int getItemViewType(int position) {
@@ -158,7 +171,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         // Bind the Chat object to the ChatHolder
         // ...
 
@@ -374,17 +387,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return messagesList.size();
     }
 
-    static class MessageHolder extends RecyclerView.ViewHolder {
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        mRecyclerView = recyclerView;
+    }
+
+    static class MessageHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         private static final String TAG = "MessageHolder";
 
-        private TextView message;
-        private TextView senderName;
-        private ImageView profileImage;
+        protected TextView message;
+        protected TextView senderName;
+        protected ImageView profileImage;
 
-        private TextView timestamp;
-        private Space incommingMessagePadding;
-        private Space messageTopSpacer;
-        private final TextView messageBackground;
+        protected TextView timestamp;
+        protected Space incommingMessagePadding;
+        protected Space messageTopSpacer;
+        protected final TextView messageBackground;
 
 
         MessageHolder(View itemView) {
@@ -440,14 +458,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             this.incommingMessagePadding = incommingMessagePadding;
         }
 
-        public Space getMessageTopSpacer() {
-            return messageTopSpacer;
-        }
-
-        public void setMessageTopSpacer(Space messageTopSpacer) {
-            this.messageTopSpacer = messageTopSpacer;
-        }
-
         public TextView getMessageBackground() {
             return messageBackground;
         }
@@ -464,16 +474,53 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     0).toString();
             timestamp.setText(timeSent);
         }
+
+        @Override
+        public void onClick(View v) {
+
+            ChangeBounds changeBounds = new ChangeBounds();
+            changeBounds.setResizeClip(false);
+            AutoTransition autoTransition = new AutoTransition();
+
+
+            if (getTimestamp().getVisibility() == View.GONE) {
+                TransitionManager.endTransitions(mRecyclerView);
+                Transition fadeOut = new Fade().setStartDelay(60).setDuration(120);
+                Transition expand = new ChangeBounds().setDuration(180);
+                TransitionSet expandingAnimation = new TransitionSet()
+                        .addTransition(fadeOut)
+                        .addTransition(expand)
+                        .setOrdering(TransitionSet.ORDERING_TOGETHER);
+
+                TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
+                getTimestamp().setVisibility(View.VISIBLE);
+
+            } else {
+                TransitionManager.endTransitions(mRecyclerView);
+                TransitionSet collapsingAnimation = new TransitionSet();
+                collapsingAnimation.addTransition(new Fade().setDuration(90))
+                        .addTransition(new ChangeBounds().setDuration(180))
+                        .setOrdering(TransitionSet.ORDERING_TOGETHER);
+
+                TransitionManager.beginDelayedTransition(mRecyclerView, collapsingAnimation);
+                getTimestamp().setVisibility(View.GONE);
+            }
+
+
+        }
+
+
+        @Override
+        public boolean onLongClick(View v) {
+            Toast.makeText(itemView.getContext(), message.getText(), Toast.LENGTH_SHORT).show();
+            return true;
+        }
     }
+
+
 
     static class IncomingMessageHolder extends MessageHolder {
         private static final String TAG = "TaskViewHolder";
-
-        private final TextView message;
-        private final TextView senderName;
-        private final TextView timestamp;
-        private final ImageView profileImage;
-        private Space messageTopSpacer;
 
         IncomingMessageHolder(View itemView) {
             super(itemView);
@@ -484,6 +531,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             timestamp = itemView.findViewById(R.id.messageTimeStamp);
             profileImage = itemView.findViewById(R.id.messageSenderProfileImage);
             messageTopSpacer = itemView.findViewById(R.id.incomingMessageTopSpacer);
+
+            message.setOnClickListener(this);
+            message.setOnLongClickListener(this);
 
         }
 
@@ -524,21 +574,28 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static class OutgoingMessageHolder extends MessageHolder {
         private static final String TAG = "TaskViewHolder";
 
-        private final TextView message;
+//        private final TextView message;
 
         OutgoingMessageHolder(View itemView) {
             super(itemView);
             Log.d(TAG, "TaskViewHolder: starts");
             message = itemView.findViewById(R.id.messageOutgoingView);
+
+            message.setOnClickListener(this);
+            message.setOnLongClickListener(this);
+        }
+
+        public TextView getMessage() {
+            return message;
         }
 
         public void setMessage(String n) {
             message.setText(n);
         }
+
     }
 
     public MessageModel getItem(int position) {
         return messagesList.get(position);
     }
-
 }

@@ -137,51 +137,51 @@ public class newChatActivity extends BaseActivity {
 
         loadMessages();
 
-        ItemClickSupport.addTo(messageListView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+//        ItemClickSupport.addTo(messageListView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+//
+//            @Override
+//            public void onItemClicked(final RecyclerView recyclerView, final int position, View v) {
+//
+//                final ChatAdapter.MessageHolder holder = (ChatAdapter.MessageHolder) recyclerView
+//                        .findViewHolderForAdapterPosition(position);
+//
+//                MessageModel message = (MessageModel) chatAdapter.getItem(position);
+//                holder.setTimestamp(message.getTimeSent());
+//
+//                if (holder.getTimestamp().getVisibility() == View.GONE) {
+//                    Transition fadeOut = new Fade().setStartDelay(60).setDuration(120);
+//                    Transition expand = new ChangeBounds().setDuration(180);
+//                    TransitionSet expandingAnimation = new TransitionSet()
+//                            .addTransition(fadeOut)
+//                            .addTransition(expand)
+//                            .setOrdering(TransitionSet.ORDERING_TOGETHER);
+//
+//                    TransitionManager.beginDelayedTransition(recyclerView, expandingAnimation);
+//                    holder.getTimestamp().setVisibility(View.VISIBLE);
+////                    expandedItems.put(position, position);
+//
+//                } else {
+//                    TransitionSet collapsingAnimation = new TransitionSet();
+//                    collapsingAnimation.addTransition(new Fade().setDuration(90))
+//                            .addTransition(new ChangeBounds().setDuration(180))
+//                            .setOrdering(TransitionSet.ORDERING_TOGETHER);
+//
+//                    TransitionManager.beginDelayedTransition(recyclerView, collapsingAnimation);
+//                    holder.getTimestamp().setVisibility(View.GONE);
+////                    expandedItems.delete(position);
+//                }
+//
+//            }
+//        });
 
-            @Override
-            public void onItemClicked(final RecyclerView recyclerView, final int position, View v) {
-
-                final ChatAdapter.MessageHolder holder = (ChatAdapter.MessageHolder) recyclerView
-                        .findViewHolderForAdapterPosition(position);
-
-                MessageModel message = (MessageModel) chatAdapter.getItem(position);
-                holder.setTimestamp(message.getTimeSent());
-
-                if (holder.getTimestamp().getVisibility() == View.GONE) {
-                    Transition fadeOut = new Fade().setStartDelay(60).setDuration(120);
-                    Transition expand = new ChangeBounds().setDuration(180);
-                    TransitionSet expandingAnimation = new TransitionSet()
-                            .addTransition(fadeOut)
-                            .addTransition(expand)
-                            .setOrdering(TransitionSet.ORDERING_TOGETHER);
-
-                    TransitionManager.beginDelayedTransition(recyclerView, expandingAnimation);
-                    holder.getTimestamp().setVisibility(View.VISIBLE);
-//                    expandedItems.put(position, position);
-
-                } else {
-                    TransitionSet collapsingAnimation = new TransitionSet();
-                    collapsingAnimation.addTransition(new Fade().setDuration(90))
-                            .addTransition(new ChangeBounds().setDuration(180))
-                            .setOrdering(TransitionSet.ORDERING_TOGETHER);
-
-                    TransitionManager.beginDelayedTransition(recyclerView, collapsingAnimation);
-                    holder.getTimestamp().setVisibility(View.GONE);
-//                    expandedItems.delete(position);
-                }
-
-            }
-        });
-
-        ItemClickSupport.addTo(messageListView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-
-                Toast.makeText(mContext, "longClickListener activated.", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        });
+//        ItemClickSupport.addTo(messageListView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
+//            @Override
+//            public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+//
+//                Toast.makeText(mContext, "longClickListener activated.", Toast.LENGTH_SHORT).show();
+//                return true;
+//            }
+//        });
 
 
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -333,23 +333,23 @@ public class newChatActivity extends BaseActivity {
         return R.layout.chat_view;
     }
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.chat_view_context_menu, menu);
-    }
+//    @Override
+//    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+//        super.onCreateContextMenu(menu, v, menuInfo);
+//        MenuInflater inflater = getMenuInflater();
+//        inflater.inflate(R.menu.chat_view_context_menu, menu);
+//    }
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.chatViewContextItemCopyText:
-                Toast.makeText(mContext, "Copy Text Selected", Toast.LENGTH_SHORT).show();
-                return true;
-            default:
-                return super.onContextItemSelected(item);
-        }
-
-    }
+//    @Override
+//    public boolean onContextItemSelected(MenuItem item) {
+//
+//        switch (item.getItemId()) {
+//            case R.id.chatViewContextItemCopyText:
+//                Toast.makeText(mContext, "Copy Text Selected", Toast.LENGTH_SHORT).show();
+//                return true;
+//            default:
+//                return super.onContextItemSelected(item);
+//        }
+//
+//    }
 }

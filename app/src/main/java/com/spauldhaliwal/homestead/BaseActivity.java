@@ -89,26 +89,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id) {
             case (R.id.action_signout):
-                AuthUI.getInstance().signOut(this)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                // User is now signed out
-                                if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
-                                    ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
-                                            .clearApplicationUserData(); // note: it has a return value!
-                                } else {
-                                    // use old hacky way, which can be removed
-                                    // once minSdkVersion goes above 19 in a few years.
-                                    Log.d(TAG, "onComplete: Application is pre kitkat.");
-                                }
-                                Intent intent = new Intent(mContext, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                                recreate();
-
-                            }
-                        });
+                signOut();
                 return true;
             case android.R.id.home:
                 finish();
@@ -117,89 +98,14 @@ public abstract class BaseActivity extends AppCompatActivity {
                 beginOnBoarding();
                 return true;
             case (R.id.menuInvite):
-                String userId = CurrentUser.getUid();
-                String homesteadId = CurrentUser.getHomesteadUid();
-                String homesteadName = CurrentUser.getHomesteadName();
-                String inviteTitle = "Join " + CurrentUser.getName() + "'s Homestead!";
-                String inviteDescription = CurrentUser.getName() + " has invited you to join their homestead: " + CurrentUser.getHomesteadName() + ". Follow the link to accept their invitation!";
-                Uri inviteImageUrl = Uri.parse(CurrentUser.getProfileImage());
-
-                Task<ShortDynamicLink> dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
-                        .setLink(Uri.parse("https://homesteadapp.com/?homesteadid=" + homesteadId
-                                + "&userid="
-                                + userId))
-
-                        .setDynamicLinkDomain("homesteadapp.page.link")
-                        // Open links with this app on android
-                        .setAndroidParameters(new DynamicLink.AndroidParameters.Builder().build())
-                        // Open links with this app on iOS
-                        .setIosParameters(new DynamicLink.IosParameters
-                                .Builder("com.spauldhaliwal.homestead").build())
-                        .setSocialMetaTagParameters(new DynamicLink.SocialMetaTagParameters.Builder()
-                                .setTitle(inviteTitle)
-                                .setDescription(inviteDescription)
-                                .setImageUrl(inviteImageUrl)
-                                .build())
-                        .buildShortDynamicLink().addOnCompleteListener(this, new OnCompleteListener<ShortDynamicLink>() {
-                            @Override
-                            public void onComplete(@NonNull Task<ShortDynamicLink> task) {
-                                if (task.isSuccessful()) {
-                                    // Short Link created
-                                    Uri shortDynamicLinkUri = task.getResult().getShortLink();
-                                    Uri flowchartLink = task.getResult().getPreviewLink();
-
-                                    Log.d(TAG, "onOptionsItemSelected: inviteUri: " + shortDynamicLinkUri);
-
-                                    Intent intent = new Intent(Intent.ACTION_SEND);
-                                    intent.setType("text/plain");
-                                    intent.putExtra(Intent.EXTRA_SUBJECT, "Invite URL");
-                                    intent.putExtra(Intent.EXTRA_TEXT, shortDynamicLinkUri.toString());
-                                    startActivity(Intent.createChooser(intent, "Invite URL"));
-
-                                } else {
-                                    // Error
-                                    // ...
-                                }
-
-                            }
-                        });
-
+                sendInvite();
                 return true;
             case (R.id.menuChatItem):
                 Intent intent = new Intent(this, newChatActivity.class);
                 startActivity(intent);
                 return true;
             case (R.id.menuLeaveHomestead):
-                new AlertDialog.Builder(this)
-                        .setTitle("Leave Homestead")
-                        .setMessage("Are you sure you want to leave this Homestead?")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                FirebaseResolver.leaveHomestead();
-                                AuthUI.getInstance().signOut(mContext)
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                // User is now signed out
-                                                if (Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT) {
-                                                    ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
-                                                            .clearApplicationUserData(); // note: it has a return value!
-                                                } else {
-                                                    // use old hacky way, which can be removed
-                                                    // once minSdkVersion goes above 19 in a few years.
-                                                    Log.d(TAG, "onComplete: Application is pre kitkat.");
-                                                }
-                                                Intent intent = new Intent(mContext, MainActivity.class);
-                                                startActivity(intent);
-                                                finish();
-                                                recreate();
-
-                                            }
-                                        });
-                            }
-                        })
-                        .setNegativeButton(android.R.string.no, null).show();
+                leaveHomestead();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -240,7 +146,84 @@ public abstract class BaseActivity extends AppCompatActivity {
         ActivityState.clearActivity(this);
     }
 
-    public void beginOnBoarding() {
+    protected void sendInvite() {
+        String userId = CurrentUser.getUid();
+        String homesteadId = CurrentUser.getHomesteadUid();
+        String homesteadName = CurrentUser.getHomesteadName();
+        String inviteTitle = "Join " + CurrentUser.getName() + "'s Homestead!";
+        String inviteDescription = CurrentUser.getName() + " has invited you to join their homestead: " + CurrentUser.getHomesteadName() + ". Follow the link to accept their invitation!";
+        Uri inviteImageUrl = Uri.parse(CurrentUser.getProfileImage());
+
+        Task<ShortDynamicLink> dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
+                .setLink(Uri.parse("https://homesteadapp.com/?homesteadid=" + homesteadId
+                        + "&userid="
+                        + userId))
+
+                .setDynamicLinkDomain("homesteadapp.page.link")
+                // Open links with this app on android
+                .setAndroidParameters(new DynamicLink.AndroidParameters.Builder().build())
+                // Open links with this app on iOS
+                .setIosParameters(new DynamicLink.IosParameters
+                        .Builder("com.spauldhaliwal.homestead").build())
+                .setSocialMetaTagParameters(new DynamicLink.SocialMetaTagParameters.Builder()
+                        .setTitle(inviteTitle)
+                        .setDescription(inviteDescription)
+                        .setImageUrl(inviteImageUrl)
+                        .build())
+                .buildShortDynamicLink().addOnCompleteListener(this, new OnCompleteListener<ShortDynamicLink>() {
+                    @Override
+                    public void onComplete(@NonNull Task<ShortDynamicLink> task) {
+                        if (task.isSuccessful()) {
+                            // Short Link created
+                            Uri shortDynamicLinkUri = task.getResult().getShortLink();
+                            Uri flowchartLink = task.getResult().getPreviewLink();
+
+                            Log.d(TAG, "onOptionsItemSelected: inviteUri: " + shortDynamicLinkUri);
+
+                            Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.setType("text/plain");
+                            intent.putExtra(Intent.EXTRA_SUBJECT, "Invite URL");
+                            intent.putExtra(Intent.EXTRA_TEXT, shortDynamicLinkUri.toString());
+                            startActivity(Intent.createChooser(intent, "Invite URL"));
+
+                        } else {
+                            // Error
+                            // ...
+                        }
+
+                    }
+                });
+    }
+
+    protected void leaveHomestead() {
+        new AlertDialog.Builder(this)
+                .setTitle("Leave Homestead")
+                .setMessage("Are you sure you want to leave this Homestead?")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        FirebaseResolver.leaveHomestead();
+                        AuthUI.getInstance().signOut(mContext)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        // User is now signed out
+
+                                        ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
+                                                .clearApplicationUserData();
+                                        Intent intent = new Intent(mContext, MainActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                        recreate();
+
+                                    }
+                                });
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null).show();
+    }
+
+    protected void beginOnBoarding() {
         if (!ActivityState.getCurrentActivity().getClass().getSimpleName().equals(MainActivity.class.getSimpleName())) {
             prefs.edit().remove("firstRun").apply();
             Intent intent = new Intent(mContext, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -312,6 +295,24 @@ public abstract class BaseActivity extends AppCompatActivity {
 
             onBoardingSequence.start();
         }
+    }
+
+    protected void signOut() {
+        AuthUI.getInstance().signOut(this)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // User is now signed out
+                        ((ActivityManager) getApplicationContext().getSystemService(ACTIVITY_SERVICE))
+                                .clearApplicationUserData(); // note: it has a return value!
+
+                        Intent intent = new Intent(mContext, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                        recreate();
+
+                    }
+                });
     }
 
     protected abstract int getLayoutId();

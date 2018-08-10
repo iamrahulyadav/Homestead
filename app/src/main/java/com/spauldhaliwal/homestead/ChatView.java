@@ -6,6 +6,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
@@ -168,5 +169,9 @@ public class ChatView extends RecyclerView {
         return false;
     }
 
+    @Override
+    protected void onCreateContextMenu(ContextMenu menu) {
 
+        super.onCreateContextMenu(menu);
+    }
 }
