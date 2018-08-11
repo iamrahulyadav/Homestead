@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.transition.ChangeBounds;
 import android.support.transition.Fade;
@@ -693,7 +694,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public BottomSheetDialog showBottomSheet(final MessageHolder messageHolder) {
         final BottomSheetDialog mBottomSheetDialog = new BottomSheetDialog(layoutInflater.getContext());
         View sheetView = layoutInflater.inflate(R.layout.chat_view_bottom_sheet, null);
-        mBottomSheetDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+//        mBottomSheetDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         mBottomSheetDialog.setContentView(sheetView);
         mBottomSheetDialog.show();
 
@@ -701,8 +702,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         final String messageText = (String) messageHolder.message.getText();
         final String messageLabel = "Message Text";
 
-        LinearLayout copy = sheetView.findViewById(R.id.chat_view_bottom_sheet_copy);
-        final LinearLayout share = sheetView.findViewById(R.id.chat_view_bottom_sheet_share);
+        ConstraintLayout copy = sheetView.findViewById(R.id.chat_view_bottom_sheet_copy);
+        ConstraintLayout share = sheetView.findViewById(R.id.chat_view_bottom_sheet_share);
 
         copy.setOnClickListener(new View.OnClickListener() {
             @Override
