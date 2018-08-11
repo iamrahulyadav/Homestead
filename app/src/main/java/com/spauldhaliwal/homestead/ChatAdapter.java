@@ -1,9 +1,13 @@
 package com.spauldhaliwal.homestead;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.transition.AutoTransition;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.transition.ChangeBounds;
 import android.support.transition.Fade;
 import android.support.transition.Transition;
@@ -13,14 +17,12 @@ import android.support.v4.widget.Space;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +40,11 @@ import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = "ChatAdapter";
+
+    int mExpandedPosition = -1;
+    int mPreviousExpandedPosition = -1;
+    int mSelectedPosition = -1;
+    int mPreviousSelectedPosition = -1;
 
     //TODO Add VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING_ISOLATED viewType to hide profile image of grouped messages
 
@@ -69,9 +76,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private HashMap<Integer, Integer> expandedItems = new HashMap<>();
 
     private List<MessageModel> messagesList;
+    private LayoutInflater layoutInflater;
 
-    public ChatAdapter(List<MessageModel> messagesList) {
+    public ChatAdapter(List<MessageModel> messagesList, LayoutInflater layoutInflater) {
         this.messagesList = messagesList;
+        this.layoutInflater = layoutInflater;
     }
 
     static RecyclerView mRecyclerView;
@@ -171,17 +180,94 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
         // Bind the Chat object to the ChatHolder
         // ...
+        Log.d(TAG, "onBindViewHolder: starts with: " + ((MessageHolder) holder).message.getText());
 
         MessageModel model = (MessageModel) this.getItem(position);
+        final MessageHolder messageHolder = (MessageHolder) holder;
 
-        if (expandedItems.containsKey(position)) {
-            ((MessageHolder) holder).timestamp.setVisibility(View.VISIBLE);
-        } else {
-            ((MessageHolder) holder).timestamp.setVisibility(View.GONE);
+        final boolean isExpanded = position == mExpandedPosition;
+        final boolean isSelected = position == mSelectedPosition;
+
+        ((MessageHolder) holder).timestamp.setVisibility(isExpanded ?
+                View.VISIBLE :
+                View.GONE);
+
+        if (incomingMessages.contains(holder.getItemViewType())) {
+            messageHolder.message.setBackgroundResource(isSelected ?
+                    R.drawable.message_incoming_selected :
+                    R.drawable.message_incoming);
+
+        } else if (outgoingMessages.contains(holder.getItemViewType())) {
+
+            messageHolder.message.setBackgroundResource(isSelected ?
+                    R.drawable.message_outgoing_selected :
+                    R.drawable.message_outgoing);
         }
+
+        holder.itemView.setActivated(isExpanded);
+
+        if (isExpanded)
+            mPreviousExpandedPosition = position;
+        if (isSelected)
+            mPreviousSelectedPosition = position;
+
+        ((MessageHolder) holder).message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
+                        + " isSelected = " + isSelected
+                        + " position = " + position);
+                TransitionManager.endTransitions(mRecyclerView);
+                Transition fadeOut = new Fade().setStartDelay(90).setDuration(120);
+                Transition expand = new ChangeBounds().setDuration(225);
+                TransitionSet expandingAnimation = new TransitionSet()
+                        .addTransition(fadeOut)
+                        .addTransition(expand)
+                        .setOrdering(TransitionSet.ORDERING_TOGETHER);
+                TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
+                mExpandedPosition = isExpanded ? -1 : position;
+                mSelectedPosition = isSelected ? -1 : position;
+
+                notifyItemChanged(mPreviousExpandedPosition);
+                notifyItemChanged(mPreviousSelectedPosition);
+                notifyItemChanged(position);
+
+            }
+        });
+
+        messageHolder.message.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
+                        + " isSelected = " + isSelected
+                        + " position = " + position);
+
+                mSelectedPosition = isSelected ? -1 : position;
+//                notifyItemChanged(mPreviousSelectedPosition);
+                notifyItemChanged(position);
+                BottomSheetDialog bottomSheetDialog =
+                        showBottomSheet(((MessageHolder) holder));
+
+                bottomSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
+                        + " isSelected = " + isSelected
+                        + " position = " + position);
+
+                        mSelectedPosition = isSelected ? position : -1;
+                        notifyItemChanged(position);
+                    }
+                });
+                Log.d(TAG, "Select onDismiss timestamp visibility set to GONE: ");
+                ((MessageHolder) holder).timestamp.setVisibility(View.GONE);
+                return true;
+            }
+
+        });
 
         String message;
 
@@ -382,6 +468,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     }
 
+
     @Override
     public int getItemCount() {
         return messagesList.size();
@@ -392,12 +479,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mRecyclerView = recyclerView;
     }
 
-    static class MessageHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
+    static class MessageHolder extends RecyclerView.ViewHolder
+//            implements View.OnClickListener, View.OnLongClickListener
+    {
         private static final String TAG = "MessageHolder";
 
         protected TextView message;
         protected TextView senderName;
         protected ImageView profileImage;
+        protected boolean isSelected;
 
         protected TextView timestamp;
         protected Space incommingMessagePadding;
@@ -419,19 +509,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public void setMessage(String n) {
             message.setText(n);
-        }
-
-        public void setSenderName(String n) {
-            senderName.setText(n);
-        }
-
-        public void setProfileImage(String d) {
-
-            Glide.with(message.getContext())
-                    .load(Uri.parse(d))
-                    .apply(RequestOptions.circleCropTransform())
-                    .into(profileImage);
-
         }
 
         public TextView getMessage() {
@@ -475,48 +552,48 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             timestamp.setText(timeSent);
         }
 
-        @Override
-        public void onClick(View v) {
-
-            ChangeBounds changeBounds = new ChangeBounds();
-            changeBounds.setResizeClip(false);
-            AutoTransition autoTransition = new AutoTransition();
-
-
-            if (getTimestamp().getVisibility() == View.GONE) {
-                TransitionManager.endTransitions(mRecyclerView);
-                Transition fadeOut = new Fade().setStartDelay(60).setDuration(120);
-                Transition expand = new ChangeBounds().setDuration(180);
-                TransitionSet expandingAnimation = new TransitionSet()
-                        .addTransition(fadeOut)
-                        .addTransition(expand)
-                        .setOrdering(TransitionSet.ORDERING_TOGETHER);
-
-                TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
-                getTimestamp().setVisibility(View.VISIBLE);
-
-            } else {
-                TransitionManager.endTransitions(mRecyclerView);
-                TransitionSet collapsingAnimation = new TransitionSet();
-                collapsingAnimation.addTransition(new Fade().setDuration(90))
-                        .addTransition(new ChangeBounds().setDuration(180))
-                        .setOrdering(TransitionSet.ORDERING_TOGETHER);
-
-                TransitionManager.beginDelayedTransition(mRecyclerView, collapsingAnimation);
-                getTimestamp().setVisibility(View.GONE);
-            }
-
-
-        }
-
-
-        @Override
-        public boolean onLongClick(View v) {
-            Toast.makeText(itemView.getContext(), message.getText(), Toast.LENGTH_SHORT).show();
-            return true;
-        }
+//        @Override
+//        public void onClick(View v) {
+//
+//            ChangeBounds changeBounds = new ChangeBounds();
+//            changeBounds.setResizeClip(false);
+//
+//            if (getTimestamp().getVisibility() == View.GONE) {
+//                TransitionManager.endTransitions(mRecyclerView);
+//                Transition fadeOut = new Fade().setStartDelay(90).setDuration(120);
+//                Transition expand = new ChangeBounds().setDuration(225);
+//                TransitionSet expandingAnimation = new TransitionSet()
+//                        .addTransition(fadeOut)
+//                        .addTransition(expand)
+//                        .setOrdering(TransitionSet.ORDERING_TOGETHER);
+//                TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
+//                getTimestamp().setVisibility(View.VISIBLE);
+////                isSelected = true;
+//
+//            } else {
+//                TransitionManager.endTransitions(mRecyclerView);
+//                TransitionSet collapsingAnimation = new TransitionSet();
+//                collapsingAnimation.addTransition(new Fade().setDuration(90))
+//                        .addTransition(new ChangeBounds().setDuration(225))
+//                        .setOrdering(TransitionSet.ORDERING_TOGETHER);
+//
+//                TransitionManager.beginDelayedTransition(mRecyclerView, collapsingAnimation);
+//                getTimestamp().setVisibility(View.GONE);
+//                message.clearFocus();
+//
+////                isSelected = false;
+//            }
+//
+//
+//        }
+//
+//
+//        @Override
+//        public boolean onLongClick(View v) {
+//            Toast.makeText(itemView.getContext(), message.getText(), Toast.LENGTH_SHORT).show();
+//            return true;
+//        }
     }
-
 
 
     static class IncomingMessageHolder extends MessageHolder {
@@ -531,9 +608,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             timestamp = itemView.findViewById(R.id.messageTimeStamp);
             profileImage = itemView.findViewById(R.id.messageSenderProfileImage);
             messageTopSpacer = itemView.findViewById(R.id.incomingMessageTopSpacer);
-
-            message.setOnClickListener(this);
-            message.setOnLongClickListener(this);
+//
+//            message.setOnClickListener(this);
+//            message.setOnLongClickListener(this);
 
         }
 
@@ -569,6 +646,20 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .into(profileImage);
 
         }
+
+//        @Override
+//        public boolean onLongClick(View v) {
+//            super.onClick(v);
+//            if (message.hasFocus()) {
+//                message.setTextColor(message.getContext().getResources().getColor(R.color.messageTextSelected));
+//                message.setBackgroundResource(R.drawable.message_incoming_selected);
+//                return true;
+//            } else {
+//                message.setTextColor(message.getContext().getResources().getColor(R.color.messageText));
+//                message.setBackgroundResource(R.drawable.message_incoming);
+//                return true;
+//            }
+//        }
     }
 
     static class OutgoingMessageHolder extends MessageHolder {
@@ -581,8 +672,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             Log.d(TAG, "TaskViewHolder: starts");
             message = itemView.findViewById(R.id.messageOutgoingView);
 
-            message.setOnClickListener(this);
-            message.setOnLongClickListener(this);
+//            message.setOnClickListener(this);
+//            message.setOnLongClickListener(this);
         }
 
         public TextView getMessage() {
@@ -597,5 +688,51 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public MessageModel getItem(int position) {
         return messagesList.get(position);
+    }
+
+    public BottomSheetDialog showBottomSheet(final MessageHolder messageHolder) {
+        final BottomSheetDialog mBottomSheetDialog = new BottomSheetDialog(layoutInflater.getContext());
+        View sheetView = layoutInflater.inflate(R.layout.chat_view_bottom_sheet, null);
+        mBottomSheetDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        mBottomSheetDialog.setContentView(sheetView);
+        mBottomSheetDialog.show();
+
+
+        final String messageText = (String) messageHolder.message.getText();
+        final String messageLabel = "Message Text";
+
+        LinearLayout copy = sheetView.findViewById(R.id.chat_view_bottom_sheet_copy);
+        final LinearLayout share = sheetView.findViewById(R.id.chat_view_bottom_sheet_share);
+
+        copy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClipboardManager clipboardManager = (ClipboardManager) messageHolder
+                        .itemView
+                        .getContext()
+                        .getSystemService(Context.CLIPBOARD_SERVICE);
+
+                ClipData clip = ClipData.newPlainText(messageLabel, messageText);
+                clipboardManager.setPrimaryClip(clip);
+
+                Toast.makeText(messageHolder.itemView.getContext(), "Copied", Toast.LENGTH_SHORT).show();
+                mBottomSheetDialog.dismiss();
+            }
+        });
+
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Context context = messageHolder.itemView.getContext();
+                Intent shareIntent = new Intent();
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_TEXT, messageText);
+                shareIntent.setType("text/plain");
+                context.startActivity(Intent.createChooser(shareIntent, "Share"));
+                mBottomSheetDialog.dismiss();
+            }
+        });
+
+        return mBottomSheetDialog;
     }
 }

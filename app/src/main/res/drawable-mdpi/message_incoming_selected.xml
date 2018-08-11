@@ -4,11 +4,12 @@
 
     <!-- View background color -->
     <solid
-        android:color="@color/messageOutgoing" >
+        android:color="@color/messageIncomingSelected" >
     </solid>
 
     <!-- The radius makes the corners rounded -->
     <corners
         android:radius="15dp">
     </corners>
+
 </shape>

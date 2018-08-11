@@ -1,5 +1,6 @@
 package com.spauldhaliwal.homestead;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,6 +27,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -79,6 +81,8 @@ public class newChatActivity extends BaseActivity {
     private String lastMessageKey;
     private String messageKey;
     private String prevMessageKey;
+    LayoutInflater layoutInflater;
+
 
     Drawable userProfileDrawable;
 
@@ -94,6 +98,7 @@ public class newChatActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        layoutInflater = getLayoutInflater();
         mContext = this;
         SharedPreferences sharedPref = this.getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
                 Context.MODE_PRIVATE);
@@ -109,15 +114,18 @@ public class newChatActivity extends BaseActivity {
         messageListView = findViewById(R.id.chatRecyclerView);
         messageListView.setHasFixedSize(true);
 
+
         linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
         messageListView.setLayoutManager(linearLayoutManager);
+        messageListView.setItemAnimator(null);
         registerForContextMenu(messageListView);
 
 
-        ((SimpleItemAnimator) messageListView.getItemAnimator()).setSupportsChangeAnimations(false);
+//        ((SimpleItemAnimator) messageListView.getItemAnimator()).setSupportsChangeAnimations(false);
 
-        chatAdapter = new ChatAdapter(messagesList);
+        chatAdapter = new ChatAdapter(messagesList, layoutInflater);
+
         messageListView.setAdapter(chatAdapter);
 
         //Endless scroll code

@@ -4,4 +4,15 @@
     <color name="colorPrimaryDark">#e6e6e6</color>
     <color name="colorAccent">#607d8b</color>
     <color name="foreground_material_light">#9b2d2d</color>
+
+    <!-- ChatView -->
+    <color name="messageIncomingText">#FF000000</color>
+    <color name="messageIncomingTextSelected">#ffffff</color>
+    <color name="messageIncoming">#e7e7e7</color>
+    <color name="messageIncomingSelected">#c7c7c7</color>
+    <color name="messageOutgoingText">#ffffff</color>
+    <color name="messageOutgoing">#607d8b</color>
+    <color name="messageOutgoingSelected">#536c79</color>
+
+
 </resources>

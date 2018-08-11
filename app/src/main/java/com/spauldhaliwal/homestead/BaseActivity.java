@@ -48,7 +48,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     Vibrator vibe;
     Drawable userProfileDrawable;
     Context mContext;
-    static Toolbar toolbar;
+    Toolbar toolbar;
 
 
     @Override
@@ -182,9 +182,9 @@ public abstract class BaseActivity extends AppCompatActivity {
 
                             Intent intent = new Intent(Intent.ACTION_SEND);
                             intent.setType("text/plain");
-                            intent.putExtra(Intent.EXTRA_SUBJECT, "Invite URL");
+                            intent.putExtra(Intent.EXTRA_SUBJECT, "Send invite link");
                             intent.putExtra(Intent.EXTRA_TEXT, shortDynamicLinkUri.toString());
-                            startActivity(Intent.createChooser(intent, "Invite URL"));
+                            startActivity(Intent.createChooser(intent, "Send invite link"));
 
                         } else {
                             // Error
@@ -247,7 +247,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             Rect rect = new Rect(centerX, 0, 0, centerY);
 
             final TapTargetSequence onBoardingSequence = new TapTargetSequence(this).targets(
-                    TapTarget.forView(findViewById(R.id.fab), "Tap here to create a new task.", "You can make it either public, and share it with your Homestead, or keep it private.")
+                    TapTarget.forView(findViewById(R.id.fab), "Tap here to create a new task.", "You can either make it public, and share it with your Homestead, or keep it private.")
                             .outerCircleColor(R.color.colorAccent)
                             .tintTarget(false)
                             .cancelable(false)

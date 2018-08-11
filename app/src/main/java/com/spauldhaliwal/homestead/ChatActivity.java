@@ -25,6 +25,7 @@ import android.support.v7.widget.SimpleItemAnimator;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -116,8 +117,8 @@ public class ChatActivity extends AppCompatActivity {
         messageListView.setLayoutManager(linearLayoutManager);
 
         ((SimpleItemAnimator) messageListView.getItemAnimator()).setSupportsChangeAnimations(false);
-
-        chatAdapter = new ChatAdapter(messagesList);
+        LayoutInflater layoutInflater = getLayoutInflater();
+        chatAdapter = new ChatAdapter(messagesList, layoutInflater);
         messageListView.setAdapter(chatAdapter);
 
         //Set overflow icon to user's profile image
@@ -466,7 +467,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 return true;
             case (R.id.menuChatItem):
-                Intent intent = new Intent(this, oldChatActivity.class);
+                Intent intent = new Intent(this, ChatActivity.class);
                 startActivity(intent);
                 return true;
             case (R.id.menuLeaveHomestead):
