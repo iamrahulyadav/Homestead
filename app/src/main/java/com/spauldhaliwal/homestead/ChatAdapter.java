@@ -1,10 +1,12 @@
 package com.spauldhaliwal.homestead;
 
+import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -29,6 +31,13 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -61,6 +70,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_MESSAGE_OUTGOING = 9;
     private static final int VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER = 10;
 
+    private static final int VIEW_TYPE_MESSAGE_HOMESTEAD = -1;
+
     private Set<Integer> incomingMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING,
             VIEW_TYPE_MESSAGE_INCOMING,
             VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER,
@@ -73,6 +84,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Set<Integer> outgoingMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_FIRST_MESSAGE_OUTGOING,
             VIEW_TYPE_MESSAGE_OUTGOING,
             VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER));
+
+    private Set<Integer> homesteadMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_HOMESTEAD));
 
     private HashMap<Integer, Integer> expandedItems = new HashMap<>();
 
@@ -108,54 +121,68 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             nextMessage = (MessageModel) this.getItem(position + 1);
 
         }
-
-        if (position == 0
+        if (model.getSenderUid().equals(CurrentUser.getHomesteadUid())) {
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_HOMESTEAD);
+            return VIEW_TYPE_MESSAGE_HOMESTEAD;
+        } else if (position == 0
                 && model.getSenderUid().equals(CurrentUser.getUid())) {
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_FIRST_MESSAGE_OUTGOING);
+
             return VIEW_TYPE_MESSAGE_FIRST_MESSAGE_OUTGOING;
         } else if (position == 0
                 && !model.getSenderUid().equals(CurrentUser.getUid())) {
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING);
             return VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING;
         } else if ((position == this.getItemCount() - 1)
                 && !lastMessage.getSenderUid().equals(model.getSenderUid())
                 && !model.getSenderUid().equals(CurrentUser.getUid())) {
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_INCOMING_ISOLATED_FINAL);
             return VIEW_TYPE_MESSAGE_INCOMING_ISOLATED_FINAL;
 
         } else if (!model.getSenderUid().equals(nextMessage.getSenderUid())
                 && !lastMessage.getSenderUid().equals(model.getSenderUid())
                 && !model.getSenderUid().equals(CurrentUser.getUid())) {
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_INCOMING_ISOLATED);
             return VIEW_TYPE_MESSAGE_INCOMING_ISOLATED;
 
         } else if ((position == this.getItemCount() - 1)
                 && lastMessage.getSenderUid().equals(model.getSenderUid())
                 && !model.getSenderUid().equals(CurrentUser.getUid())) {
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST_FINAL);
             return VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST_FINAL;
 
         } else if (model.getSenderUid().equals(nextMessage.getSenderUid())
                 && lastMessage.getSenderUid().equals(model.getSenderUid())
                 && !model.getSenderUid().equals(CurrentUser.getUid())) {
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_SURROUNDED);
             return VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_SURROUNDED;
 
         } else if (!model.getSenderUid().equals(nextMessage.getSenderUid())
                 && lastMessage.getSenderUid().equals(model.getSenderUid())
                 && !model.getSenderUid().equals(CurrentUser.getUid())) {
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST);
             return VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER_LAST;
 
         } else if (!model.getSenderUid().equals(CurrentUser.getUid())
                 && lastMessage.getSenderUid().equals(model.getSenderUid())) {
             // messageSender is someone else but also sender of last message
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER);
             return VIEW_TYPE_MESSAGE_INCOMING_SAME_SENDER;
 
         } else if (!model.getSenderUid().equals(CurrentUser.getUid())) {
             // Message sender is someone else
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_INCOMING);
             return VIEW_TYPE_MESSAGE_INCOMING;
 
         } else if (model.getSenderUid().equals(CurrentUser.getUid())
                 && lastMessage.getSenderUid().equals(model.getSenderUid())) {
             // Current user is the sender of the message but not the last message
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER);
             return VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER;
 
         } else if (model.getSenderUid().equals(CurrentUser.getUid())) {
             // Current user is the sender of the message but not the last message
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_OUTGOING);
             return VIEW_TYPE_MESSAGE_OUTGOING;
 
         } else {
@@ -175,6 +202,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.chat_message_outgoing, parent, false);
             return new OutgoingMessageHolder(view);
+        } else if (homesteadMessages.contains(viewType)) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.chat_message_utility, parent, false);
+            return new UtilityMessageHolder(view);
         } else {
             return null;
         }
@@ -184,96 +215,141 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
         // Bind the Chat object to the ChatHolder
         // ...
-        Log.d(TAG, "onBindViewHolder: starts with: " + ((MessageHolder) holder).message.getText());
+//        Log.d(TAG, "onBindViewHolder: starts with: " + ((MessageHolder) holder).message.getText());
 
-        MessageModel model = (MessageModel) this.getItem(position);
-        final MessageHolder messageHolder = (MessageHolder) holder;
 
-        final boolean isExpanded = position == mExpandedPosition;
-        final boolean isSelected = position == mSelectedPosition;
+        final MessageModel model = (MessageModel) this.getItem(position);
+        if (!model.getSenderUid().equals(CurrentUser.getHomesteadUid())) {
+            final MessageHolder messageHolder = (MessageHolder) holder;
 
-        ((MessageHolder) holder).timestamp.setVisibility(isExpanded ?
-                View.VISIBLE :
-                View.GONE);
+            final boolean isExpanded = position == mExpandedPosition;
+            final boolean isSelected = position == mSelectedPosition;
 
-        if (incomingMessages.contains(holder.getItemViewType())) {
-            messageHolder.message.setBackgroundResource(isSelected ?
-                    R.drawable.message_incoming_selected :
-                    R.drawable.message_incoming);
+            ((MessageHolder) holder).timestamp.setVisibility(isExpanded ?
+                    View.VISIBLE :
+                    View.GONE);
 
-        } else if (outgoingMessages.contains(holder.getItemViewType())) {
+            if (incomingMessages.contains(holder.getItemViewType())) {
+                messageHolder.message.setBackgroundResource(isSelected ?
+                        R.drawable.message_incoming_selected :
+                        R.drawable.message_incoming);
 
-            messageHolder.message.setBackgroundResource(isSelected ?
-                    R.drawable.message_outgoing_selected :
-                    R.drawable.message_outgoing);
+            } else if (outgoingMessages.contains(holder.getItemViewType())) {
+
+                messageHolder.message.setBackgroundResource(isSelected ?
+                        R.drawable.message_outgoing_selected :
+                        R.drawable.message_outgoing);
+            }
+
+            holder.itemView.setActivated(isExpanded);
+
+            if (isExpanded)
+                mPreviousExpandedPosition = position;
+            if (isSelected)
+                mPreviousSelectedPosition = position;
+
+            ((MessageHolder) holder).message.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
+                            + " isSelected = " + isSelected
+                            + " position = " + position);
+                    TransitionManager.endTransitions(mRecyclerView);
+                    Transition fadeOut = new Fade().setStartDelay(90).setDuration(120);
+                    Transition expand = new ChangeBounds().setDuration(225);
+                    TransitionSet expandingAnimation = new TransitionSet()
+                            .addTransition(fadeOut)
+                            .addTransition(expand)
+                            .setOrdering(TransitionSet.ORDERING_TOGETHER);
+                    TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
+                    mExpandedPosition = isExpanded ? -1 : position;
+                    mSelectedPosition = isSelected ? -1 : position;
+
+                    notifyItemChanged(mPreviousExpandedPosition);
+                    notifyItemChanged(mPreviousSelectedPosition);
+                    notifyItemChanged(position);
+
+                }
+            });
+
+            messageHolder.message.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
+                            + " isSelected = " + isSelected
+                            + " position = " + position);
+
+                    mSelectedPosition = isSelected ? -1 : position;
+//                notifyItemChanged(mPreviousSelectedPosition);
+                    notifyItemChanged(position);
+                    BottomSheetDialog bottomSheetDialog =
+                            showBottomSheet(((MessageHolder) holder));
+
+                    bottomSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
+                                    + " isSelected = " + isSelected
+                                    + " position = " + position);
+
+                            mSelectedPosition = isSelected ? position : -1;
+                            notifyItemChanged(position);
+                        }
+                    });
+                    Log.d(TAG, "Select onDismiss timestamp visibility set to GONE: ");
+                    ((MessageHolder) holder).timestamp.setVisibility(View.GONE);
+                    return true;
+                }
+
+            });
+        } else if (model.getSenderUid().equals(CurrentUser.getHomesteadUid())) {
+            final View actionView = ((UtilityMessageHolder) holder).actionView;
+            actionView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SharedPreferences sharedPref = actionView.getContext().getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                            Context.MODE_PRIVATE);
+                    String homesteadId = sharedPref.getString(UsersContract.HOMESTEAD_ID, null);
+                    Log.d(TAG, "onClick: model.getProfileImage" + model.getProfileImage());
+                    DatabaseReference jobRef = FirebaseDatabase.getInstance()
+                            .getReference()
+                            .child(HomesteadsContract.ROOT_NODE)
+                            .child(homesteadId)
+                            .child(JobsContract.ROOT_NODE)
+                            //temporary value, model classes need to be remodeled to include jobId.
+                            .child(model.getProfileImage());
+
+                    jobRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            JobModel jobModel = dataSnapshot.getValue(JobModel.class);
+                            Log.d(TAG, "onDataChange: jobModel = " + jobModel);
+
+                            Intent intent = new Intent(holder.itemView.getContext(), newAddEditActivity.class);
+                            intent.putExtra(JobsContract.ROOT_NODE, jobModel);
+                            actionView.getContext().startActivity(intent);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            });
         }
 
-        holder.itemView.setActivated(isExpanded);
-
-        if (isExpanded)
-            mPreviousExpandedPosition = position;
-        if (isSelected)
-            mPreviousSelectedPosition = position;
-
-        ((MessageHolder) holder).message.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
-                        + " isSelected = " + isSelected
-                        + " position = " + position);
-                TransitionManager.endTransitions(mRecyclerView);
-                Transition fadeOut = new Fade().setStartDelay(90).setDuration(120);
-                Transition expand = new ChangeBounds().setDuration(225);
-                TransitionSet expandingAnimation = new TransitionSet()
-                        .addTransition(fadeOut)
-                        .addTransition(expand)
-                        .setOrdering(TransitionSet.ORDERING_TOGETHER);
-                TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
-                mExpandedPosition = isExpanded ? -1 : position;
-                mSelectedPosition = isSelected ? -1 : position;
-
-                notifyItemChanged(mPreviousExpandedPosition);
-                notifyItemChanged(mPreviousSelectedPosition);
-                notifyItemChanged(position);
-
-            }
-        });
-
-        messageHolder.message.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
-                        + " isSelected = " + isSelected
-                        + " position = " + position);
-
-                mSelectedPosition = isSelected ? -1 : position;
-//                notifyItemChanged(mPreviousSelectedPosition);
-                notifyItemChanged(position);
-                BottomSheetDialog bottomSheetDialog =
-                        showBottomSheet(((MessageHolder) holder));
-
-                bottomSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
-                        + " isSelected = " + isSelected
-                        + " position = " + position);
-
-                        mSelectedPosition = isSelected ? position : -1;
-                        notifyItemChanged(position);
-                    }
-                });
-                Log.d(TAG, "Select onDismiss timestamp visibility set to GONE: ");
-                ((MessageHolder) holder).timestamp.setVisibility(View.GONE);
-                return true;
-            }
-
-        });
 
         String message;
 
         switch (holder.getItemViewType()) {
-
+            case VIEW_TYPE_MESSAGE_HOMESTEAD:
+                String title = model.getSenderName() + " added a new task to the Homestead";
+                String body = model.getMessage();
+                ((UtilityMessageHolder) holder).setMessageTitle(title);
+                ((UtilityMessageHolder) holder).setMessageBody(body);
+                ((UtilityMessageHolder) holder).setMessageTimestamp(model.getTimeSent());
+                break;
             case VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING:
                 ((IncomingMessageHolder) holder).setMessage(model.getMessage());
 //                ((MessageHolder) holder).incommingMessagePadding.setVisibility(View.INVISIBLE);
@@ -420,18 +496,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                }
                 break;
             case VIEW_TYPE_MESSAGE_FIRST_MESSAGE_OUTGOING:
-                ((MessageHolder) holder).setMessage(model.getMessage());
-                ((MessageHolder) holder).incommingMessagePadding.setVisibility(View.INVISIBLE);
-                ((MessageHolder) holder).messageTopSpacer.setVisibility(View.INVISIBLE);
+                ((OutgoingMessageHolder) holder).setMessage(model.getMessage());
+                ((OutgoingMessageHolder) holder).incommingMessagePadding.setVisibility(View.INVISIBLE);
+                ((OutgoingMessageHolder) holder).messageTopSpacer.setVisibility(View.INVISIBLE);
 
-                ((MessageHolder) holder).setTimestamp(model.getTimeSent());
+                ((OutgoingMessageHolder) holder).setTimestamp(model.getTimeSent());
                 //                        Code to parse standalone emojis and make them larger.
                 message = model.getMessage();
                 break;
             case VIEW_TYPE_MESSAGE_OUTGOING:
                 ((OutgoingMessageHolder) holder).setMessage(model.getMessage());
-                ((MessageHolder) holder).incommingMessagePadding.setVisibility(View.INVISIBLE);
-                ((MessageHolder) holder).setTimestamp(model.getTimeSent());
+                ((OutgoingMessageHolder) holder).incommingMessagePadding.setVisibility(View.INVISIBLE);
+                ((OutgoingMessageHolder) holder).setTimestamp(model.getTimeSent());
                 //                        Code to parse standalone emojis and make them larger.
                 message = model.getMessage();
 
@@ -449,7 +525,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 break;
             case VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER:
                 ((OutgoingMessageHolder) holder).setMessage(model.getMessage());
-                ((MessageHolder) holder).setTimestamp(model.getTimeSent());
+                ((OutgoingMessageHolder) holder).setTimestamp(model.getTimeSent());
                 //                        Code to parse standalone emojis and make them larger.
                 message = model.getMessage();
 
@@ -480,9 +556,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mRecyclerView = recyclerView;
     }
 
-    static class MessageHolder extends RecyclerView.ViewHolder
-//            implements View.OnClickListener, View.OnLongClickListener
-    {
+    static class MessageHolder extends RecyclerView.ViewHolder {
+        //            implements View.OnClickListener, View.OnLongClickListener
         private static final String TAG = "MessageHolder";
 
         protected TextView message;
@@ -685,6 +760,57 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             message.setText(n);
         }
 
+    }
+
+    static class UtilityMessageHolder extends MessageHolder {
+        TextView messageTitle;
+        TextView messageBody;
+        TextView messageTimestamp;
+        View actionView;
+        public UtilityMessageHolder(View itemView) {
+            super(itemView);
+            messageTitle = itemView.findViewById(R.id.utitlityMessageTitle);
+            messageBody = itemView.findViewById(R.id.utilityMessageBody);
+            messageTimestamp = itemView.findViewById(R.id.utilityMessageTimeStamp);
+            actionView = itemView.findViewById(R.id.utilityMessageActionView);
+        }
+
+        public TextView getMessageTitle() {
+            return messageTitle;
+        }
+
+        public void setMessageTitle(String n) {
+            messageTitle.setText(n);
+        }
+
+        public TextView getMessageBody() {
+            return messageBody;
+        }
+
+        public void setMessageBody(String n) {
+            messageBody.setText(n);
+        }
+
+        public void setMessageTimestamp(long time) {
+            String timeSent = DateUtils.getRelativeDateTimeString(messageTimestamp.getContext(),
+                    time,
+                    MINUTE_IN_MILLIS,
+                    WEEK_IN_MILLIS,
+                    0).toString();
+            messageTimestamp.setText(timeSent);
+        }
+
+        public TextView getMessageTimestamp() {
+            return messageTimestamp;
+        }
+
+        public View getActionView() {
+            return actionView;
+        }
+
+        public void setActionView(View actionView) {
+            this.actionView = actionView;
+        }
     }
 
     public MessageModel getItem(int position) {

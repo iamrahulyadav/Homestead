@@ -3,7 +3,9 @@ package com.spauldhaliwal.homestead;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -47,8 +49,13 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
         notificationSenderUid = notificationData.get("sender_uid").toString();
         notificationBody = notificationData.get("body").toString();
 
+        SharedPreferences sharedPref = ActivityState.getCurrentActivity().getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                Context.MODE_PRIVATE);
+        String homesteadId = sharedPref.getString(UsersContract.HOMESTEAD_ID, null);
+
         String channelId;
-        if (!notificationSenderUid.equals(CurrentUser.getUid())) {
+        if (!notificationSenderUid.equals(CurrentUser.getUid())
+                && !notificationSenderUid.equals(homesteadId)) {
             //only send in-app notifications if the senderUid and currentUserUid are not the same
 
             if (notificationType.equals(MessagesContract.TYPE)) {

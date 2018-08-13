@@ -38,7 +38,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".newChatActivity"
+            android:name=".oldChatActivity"
             android:label="Homestead"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:theme="@style/AppTheme.NoActionBar"

@@ -1,7 +1,6 @@
 package com.spauldhaliwal.homestead;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,7 +10,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
@@ -26,7 +24,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -101,7 +98,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 sendInvite();
                 return true;
             case (R.id.menuChatItem):
-                Intent intent = new Intent(this, newChatActivity.class);
+                Intent intent = new Intent(this, ChatActivity.class);
                 startActivity(intent);
                 return true;
             case (R.id.menuLeaveHomestead):

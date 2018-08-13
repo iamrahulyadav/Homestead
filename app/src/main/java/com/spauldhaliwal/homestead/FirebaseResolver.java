@@ -23,6 +23,7 @@ public abstract class FirebaseResolver {
 
         final DatabaseReference databaseJobs = FirebaseDatabase.getInstance().
                 getReference(JobsContract.ROOT_NODE);
+
         if (isPrivate) {
             if (name.length() > 0) {
                 DatabaseReference userRef = FirebaseDatabase
@@ -47,6 +48,7 @@ public abstract class FirebaseResolver {
 
         } else {
             if (name.length() > 0) {
+                String id = null;
                 // Retrieve current user's node in /Users
                 //
                 DatabaseReference userHomesteadRef = FirebaseDatabase
@@ -92,6 +94,12 @@ public abstract class FirebaseResolver {
                                 JobsContract.TYPE);
 
                         homesteadNotifications.child(notificationId).setValue(notificationModel);
+
+                        sendMessage(name,
+                                CurrentUser.getHomesteadUid(),
+                                CurrentUser.getName(),
+                                System.currentTimeMillis(),
+                                id);
                     }
 
                     @Override

@@ -81,6 +81,7 @@ public class AddEditActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: AddEditActivity starts");
         super.onCreate(savedInstanceState);
         mContext = this;
         vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -263,15 +264,17 @@ public class AddEditActivity extends AppCompatActivity {
                 switch (mMode) {
                     case ADD:
                         Log.d(TAG, "Save Button onClick: EditMode is " + mMode);
-                        if (FirebaseResolver.insertJob(name,
+//                        if (
+                                FirebaseResolver.insertJob(name,
                                 description,
                                 CurrentUser.getUid(),
                                 CurrentUser.getProfileImage(),
-                                privacySwitch.isChecked())) {
+                                privacySwitch.isChecked());
+//                        ) {
                             finish();
-                        } else {
-                            Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
-                        }
+//                        } else {
+//                            Toast.makeText(AddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
+//                        }
                         break;
 
                     case CREATOR:

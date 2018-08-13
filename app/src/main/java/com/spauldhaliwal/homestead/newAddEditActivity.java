@@ -50,6 +50,8 @@ public class newAddEditActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: starts");
+
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.task_details);
 //        loadToolbar();
@@ -102,6 +104,7 @@ public class newAddEditActivity extends BaseActivity {
             Log.d(TAG, "onCreate: Previous job found. Retrieving job details");
             // retrieve task details
             job = (JobModel) arguments.getSerializable(JobsContract.ROOT_NODE);
+            Log.d(TAG, "onCreate: Previous job is: " + job.toString());
             KeyListener editNameKeyListener = editName.getKeyListener();
             KeyListener editDescriptionKeyListener = editDescription.getKeyListener();
 
@@ -115,7 +118,7 @@ public class newAddEditActivity extends BaseActivity {
                     deleteButon.setVisibility(View.GONE);
                     mMode = openMode.AVAILABLE;
 
-                }  else if (job.getCreatorId().equals(CurrentUser.getUid())) {
+                } else if (job.getCreatorId().equals(CurrentUser.getUid())) {
                     // User is the creator of this job and it has not been claimed yet. Can still
                     // be deleted/edited.
                     editName.setKeyListener(editNameKeyListener);
@@ -125,7 +128,7 @@ public class newAddEditActivity extends BaseActivity {
 
                 }
 
-            } else if (job.getStatus() == JobsContract.STATUS_CLAIMED){
+            } else if (job.getStatus() == JobsContract.STATUS_CLAIMED) {
                 //Job has been claimed.
                 claimCompleteTaskCheckBox.setEnabled(false);
                 deleteButon.setVisibility(View.GONE);
@@ -147,9 +150,7 @@ public class newAddEditActivity extends BaseActivity {
                     claimTaskTextView.setText("Task has been claimed");
                     mMode = openMode.VIEW;
 
-                }
-
-                else if (job.getOwner().equals(CurrentUser.getUid())) {
+                } else if (job.getOwner().equals(CurrentUser.getUid())) {
                     //User is the creator of this job and the claimant.
                     claimCompleteTaskCheckBox.setEnabled(true);
                     saveButton.setVisibility(View.VISIBLE);
@@ -246,19 +247,18 @@ public class newAddEditActivity extends BaseActivity {
 
                         } else if (claimCompleteTaskCheckBox.isChecked()) {
                             Log.d(TAG, "Private edit save onClick: ");
-                        if (FirebaseResolver.updateJob(jobId,
-                                name,
-                                description,
-                                JobsContract.STATUS_CLOSED,
-                                CurrentUser.getUid(),
-                                jobScope)) {
-                            finish();
-                        } else {
-                            Toast.makeText(newAddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
-                        }
+                            if (FirebaseResolver.updateJob(jobId,
+                                    name,
+                                    description,
+                                    JobsContract.STATUS_CLOSED,
+                                    CurrentUser.getUid(),
+                                    jobScope)) {
+                                finish();
+                            } else {
+                                Toast.makeText(newAddEditActivity.this, "Name is required.", Toast.LENGTH_LONG).show();
+                            }
 
-                    }
-                        else {
+                        } else {
                             if (FirebaseResolver.updateJob(jobId,
                                     name,
                                     description,
@@ -304,7 +304,7 @@ public class newAddEditActivity extends BaseActivity {
                                     jobScope);
                             finish();
                             break;
-                    }
+                        }
 
                 }
             }
@@ -361,7 +361,7 @@ public class newAddEditActivity extends BaseActivity {
 
                 notesList.add(jobNote);
                 Log.d(TAG, "onChildAdded: " + jobNote.toString());
-                Log.d(TAG, "onChildAdded: notesLit: "+ notesList.toString());
+                Log.d(TAG, "onChildAdded: notesLit: " + notesList.toString());
                 jobNotesRecyclerAdapter.notifyDataSetChanged();
             }
 
