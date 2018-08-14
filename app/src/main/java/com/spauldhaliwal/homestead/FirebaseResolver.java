@@ -96,7 +96,7 @@ public abstract class FirebaseResolver {
                         homesteadNotifications.child(notificationId).setValue(notificationModel);
 
                         sendMessage(name,
-                                CurrentUser.getHomesteadUid(),
+                                HomesteadsContract.HOMESTEAD_MESSAGES_ID,
                                 CurrentUser.getName(),
                                 System.currentTimeMillis(),
                                 id);

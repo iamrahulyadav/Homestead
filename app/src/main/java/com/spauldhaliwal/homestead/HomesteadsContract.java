@@ -11,5 +11,6 @@ public class HomesteadsContract {
     static final String NAME = "name";
     static final String JOBS_NODE = "Jobs";
     static final String NOTIFICATIONS = "_notifications";
+    static final String HOMESTEAD_MESSAGES_ID = "system_message";
 
 }

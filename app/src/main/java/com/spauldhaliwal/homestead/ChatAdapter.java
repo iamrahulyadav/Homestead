@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.net.wifi.hotspot2.pps.HomeSp;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetDialog;
@@ -85,6 +86,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             VIEW_TYPE_MESSAGE_OUTGOING,
             VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER));
 
+    private String homesteadMessageId = HomesteadsContract.HOMESTEAD_MESSAGES_ID;
+
     private Set<Integer> homesteadMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_HOMESTEAD));
 
     private HashMap<Integer, Integer> expandedItems = new HashMap<>();
@@ -121,7 +124,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             nextMessage = (MessageModel) this.getItem(position + 1);
 
         }
-        if (model.getSenderUid().equals(CurrentUser.getHomesteadUid())) {
+        if (model.getSenderUid().equals(homesteadMessageId)) {
             Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_HOMESTEAD);
             return VIEW_TYPE_MESSAGE_HOMESTEAD;
         } else if (position == 0
@@ -219,7 +222,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 
         final MessageModel model = (MessageModel) this.getItem(position);
-        if (!model.getSenderUid().equals(CurrentUser.getHomesteadUid())) {
+        if (!model.getSenderUid().equals(homesteadMessageId)) {
             final MessageHolder messageHolder = (MessageHolder) holder;
 
             final boolean isExpanded = position == mExpandedPosition;
@@ -302,7 +305,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
 
             });
-        } else if (model.getSenderUid().equals(CurrentUser.getHomesteadUid())) {
+        } else if (model.getSenderUid().equals(homesteadMessageId)) {
             final View actionView = ((UtilityMessageHolder) holder).actionView;
             actionView.setOnClickListener(new View.OnClickListener() {
                 @Override
