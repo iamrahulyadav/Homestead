@@ -1,6 +1,8 @@
 package com.spauldhaliwal.homestead;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -44,6 +46,8 @@ public class newAddEditActivity extends BaseActivity {
     static String jobOwner;
     static boolean jobScope;
 
+    private String currentUserId;
+
     private openMode mMode;
 
     Dialog addNoteDialog;
@@ -53,8 +57,9 @@ public class newAddEditActivity extends BaseActivity {
         Log.d(TAG, "onCreate: starts");
 
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.task_details);
-//        loadToolbar();
+        SharedPreferences sharedPref = this.getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                Context.MODE_PRIVATE);
+         currentUserId = sharedPref.getString(UsersContract.UID, null);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -136,21 +141,21 @@ public class newAddEditActivity extends BaseActivity {
                 editDescription.setKeyListener(null);
                 saveButton.setVisibility(View.GONE);
 
-                if (!job.getCreatorId().equals(CurrentUser.getUid())
-                        && job.getOwner().equals(CurrentUser.getUid())) {
+                if (!job.getCreatorId().equals(currentUserId)
+                        && job.getOwner().equals(currentUserId)) {
                     //User is not the creator of this task but has claimed it.
                     claimCompleteTaskCheckBox.setEnabled(true);
                     claimTaskTextView.setText("Mark as complete");
                     saveButton.setVisibility(View.VISIBLE);
                     mMode = openMode.OWNER;
 
-                } else if (!job.getOwner().equals(CurrentUser.getUid())) {
+                } else if (!job.getOwner().equals(currentUserId)) {
                     // User is not the claimant of this task.
                     claimCompleteTaskCheckBox.setVisibility(View.GONE);
                     claimTaskTextView.setText("Task has been claimed");
                     mMode = openMode.VIEW;
 
-                } else if (job.getOwner().equals(CurrentUser.getUid())) {
+                } else if (job.getOwner().equals(currentUserId)) {
                     //User is the creator of this job and the claimant.
                     claimCompleteTaskCheckBox.setEnabled(true);
                     saveButton.setVisibility(View.VISIBLE);
@@ -220,7 +225,7 @@ public class newAddEditActivity extends BaseActivity {
                         Log.d(TAG, "Save Button onClick: EditMode is " + mMode);
                         if (FirebaseResolver.insertJob(name,
                                 description,
-                                CurrentUser.getUid(),
+                                currentUserId,
                                 CurrentUser.getProfileImage(),
                                 privacySwitch.isChecked())) {
                             finish();
@@ -238,7 +243,7 @@ public class newAddEditActivity extends BaseActivity {
                                     name,
                                     description,
                                     JobsContract.STATUS_CLAIMED,
-                                    CurrentUser.getUid(),
+                                    currentUserId,
                                     jobScope)) {
                                 finish();
                             } else {
@@ -251,7 +256,7 @@ public class newAddEditActivity extends BaseActivity {
                                     name,
                                     description,
                                     JobsContract.STATUS_CLOSED,
-                                    CurrentUser.getUid(),
+                                    currentUserId,
                                     jobScope)) {
                                 finish();
                             } else {
@@ -278,7 +283,7 @@ public class newAddEditActivity extends BaseActivity {
                                 name,
                                 description,
                                 JobsContract.STATUS_CLAIMED,
-                                CurrentUser.getUid(),
+                                currentUserId,
                                 jobScope)) {
                             finish();
                         } else {
@@ -300,7 +305,7 @@ public class newAddEditActivity extends BaseActivity {
                                     name,
                                     description,
                                     JobsContract.STATUS_CLOSED,
-                                    CurrentUser.getUid(),
+                                    currentUserId,
                                     jobScope);
                             finish();
                             break;
@@ -333,7 +338,7 @@ public class newAddEditActivity extends BaseActivity {
                     @Override
                     public void onClick(View v) {
                         FirebaseResolver.insertJobNote(job.getId(),
-                                CurrentUser.getUid(),
+                                currentUserId,
                                 CurrentUser.getProfileImage(),
                                 addNoteText.getText().toString(),
                                 jobScope);

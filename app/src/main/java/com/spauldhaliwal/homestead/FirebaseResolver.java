@@ -95,11 +95,14 @@ public abstract class FirebaseResolver {
 
                         homesteadNotifications.child(notificationId).setValue(notificationModel);
 
+                        MessageModel.MessageAttachment newJobSystemMessage = new MessageModel.MessageAttachment(id, AttachmentsContract.TYPE_JOB);
+
                         sendMessage(name,
                                 HomesteadsContract.HOMESTEAD_MESSAGES_ID,
                                 CurrentUser.getName(),
                                 System.currentTimeMillis(),
-                                id);
+                                CurrentUser.getProfileImage(),
+                                newJobSystemMessage);
                     }
 
                     @Override
@@ -191,7 +194,12 @@ public abstract class FirebaseResolver {
 
     }
 
-    static boolean sendMessage(final String message, final String senderId, final String senderName, final long timeSent, final String senderProfileImage) {
+    static boolean sendMessage(final String message,
+                               final String senderId,
+                               final String senderName,
+                               final long timeSent,
+                               final String senderProfileImage,
+                               final MessageModel.MessageAttachment attachment) {
 
         final DatabaseReference databaseMessages = FirebaseDatabase.getInstance().
                 getReference(MessagesContract.ROOT_NODE);
@@ -216,8 +224,17 @@ public abstract class FirebaseResolver {
                     .child(CurrentUser.getHomesteadUid());
 
             String id = databaseMessages.push().getKey();
-            MessageModel messageModel = new MessageModel(message, id, senderId, senderName, timeSent, senderProfileImage);
-            messageRef.child(id).setValue(messageModel);
+            MessageModel messageModel;
+
+            if (attachment != null) {
+                messageModel = new MessageModel(message, id, senderId, senderName, timeSent, senderProfileImage, attachment);
+                messageRef.child(id).setValue(messageModel);
+                messageRef.child(id).child(AttachmentsContract.NODE).setValue(attachment);
+            } else {
+                messageModel = new MessageModel(message, id, senderId, senderName, timeSent, senderProfileImage, attachment);
+                messageRef.child(id).setValue(messageModel);
+
+            }
 
             String notificationId = homesteadNotifications.push().getKey();
             NotificationModel notificationModel = new NotificationModel(senderName,
@@ -358,7 +375,7 @@ public abstract class FirebaseResolver {
                 .child(UsersContract.ROOT_NODE)
                 .child(userUid);
 
-       userRef.child(UsersContract.HOMESTEAD_ID).removeValue();
+        userRef.child(UsersContract.HOMESTEAD_ID).removeValue();
 
     }
 

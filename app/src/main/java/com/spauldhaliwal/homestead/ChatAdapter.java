@@ -52,10 +52,10 @@ import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = "ChatAdapter";
 
-    int mExpandedPosition = -1;
-    int mPreviousExpandedPosition = -1;
-    int mSelectedPosition = -1;
-    int mPreviousSelectedPosition = -1;
+    private int mExpandedPosition = -1;
+    private int mPreviousExpandedPosition = -1;
+    private int mSelectedPosition = -1;
+    private int mPreviousSelectedPosition = -1;
 
     //TODO Add VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING_ISOLATED viewType to hide profile image of grouped messages
 
@@ -89,8 +89,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private String homesteadMessageId = HomesteadsContract.HOMESTEAD_MESSAGES_ID;
 
     private Set<Integer> homesteadMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_HOMESTEAD));
-
-    private HashMap<Integer, Integer> expandedItems = new HashMap<>();
 
     private List<MessageModel> messagesList;
     private LayoutInflater layoutInflater;
@@ -257,16 +255,36 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
                             + " isSelected = " + isSelected
                             + " position = " + position);
-                    TransitionManager.endTransitions(mRecyclerView);
-                    Transition fadeOut = new Fade().setStartDelay(90).setDuration(120);
-                    Transition expand = new ChangeBounds().setDuration(225);
-                    TransitionSet expandingAnimation = new TransitionSet()
-                            .addTransition(fadeOut)
-                            .addTransition(expand)
-                            .setOrdering(TransitionSet.ORDERING_TOGETHER);
-                    TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
-                    mExpandedPosition = isExpanded ? -1 : position;
-                    mSelectedPosition = isSelected ? -1 : position;
+
+//                    mExpandedPosition = isExpanded ? -1 : position;
+//                    mSelectedPosition = isSelected ? -1 : position;
+
+                    if (isExpanded) {
+                        TransitionManager.endTransitions(mRecyclerView);
+                        TransitionSet collapsingAnimation = new TransitionSet();
+                        collapsingAnimation.addTransition(new Fade().setDuration(90))
+                                .addTransition(new ChangeBounds().setDuration(225))
+                                .setOrdering(TransitionSet.ORDERING_TOGETHER);
+
+                        TransitionManager.beginDelayedTransition(mRecyclerView, collapsingAnimation);
+                        mExpandedPosition = -1;
+                    } else {
+                        TransitionManager.endTransitions(mRecyclerView);
+                        Transition fadeOut = new Fade().setStartDelay(70).setDuration(120);
+                        Transition expand = new ChangeBounds().setDuration(225);
+                        TransitionSet expandingAnimation = new TransitionSet()
+                                .addTransition(fadeOut)
+                                .addTransition(expand)
+                                .setOrdering(TransitionSet.ORDERING_TOGETHER);
+                        TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
+                        mExpandedPosition = position;
+                    }
+
+                    if (isSelected) {
+                        mSelectedPosition = -1;
+                    } else {
+                        mSelectedPosition = position;
+                    }
 
                     notifyItemChanged(mPreviousExpandedPosition);
                     notifyItemChanged(mPreviousSelectedPosition);
@@ -313,16 +331,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     SharedPreferences sharedPref = actionView.getContext().getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
                             Context.MODE_PRIVATE);
                     String homesteadId = sharedPref.getString(UsersContract.HOMESTEAD_ID, null);
-                    Log.d(TAG, "onClick: model.getProfileImage" + model.getProfileImage());
+                    Log.d(TAG, "onClick: model.getAttachment " + model.getAttachments());
                     DatabaseReference jobRef = FirebaseDatabase.getInstance()
                             .getReference()
                             .child(HomesteadsContract.ROOT_NODE)
                             .child(homesteadId)
                             .child(JobsContract.ROOT_NODE)
                             //temporary value, model classes need to be remodeled to include jobId.
-                            .child(model.getProfileImage());
+                            .child(model.getAttachments().getPayload());
 
-                    jobRef.addValueEventListener(new ValueEventListener() {
+                    jobRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             JobModel jobModel = dataSnapshot.getValue(JobModel.class);
@@ -770,6 +788,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView messageBody;
         TextView messageTimestamp;
         View actionView;
+
         public UtilityMessageHolder(View itemView) {
             super(itemView);
             messageTitle = itemView.findViewById(R.id.utitlityMessageTitle);
