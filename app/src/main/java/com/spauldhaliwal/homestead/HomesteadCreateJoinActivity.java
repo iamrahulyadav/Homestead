@@ -23,6 +23,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class HomesteadCreateJoinActivity extends AppCompatActivity {
 
@@ -98,6 +99,9 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
                                                         Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
                                                         editor.apply();
 
+                                                        FirebaseMessaging.getInstance()
+                                                                .subscribeToTopic(CurrentUser.getHomesteadUid() + HomesteadsContract.NOTIFICATIONS);
+
                                                         Intent intent = new Intent(HomesteadCreateJoinActivity.this, MainActivity.class);
                                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                         startActivity(intent);
@@ -155,6 +159,9 @@ public class HomesteadCreateJoinActivity extends AppCompatActivity {
                             editor.putString(UsersContract.PROFILE_IMAGE, CurrentUser.getProfileImage());
                             Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
                             editor.apply();
+
+                            FirebaseMessaging.getInstance()
+                                    .subscribeToTopic(CurrentUser.getHomesteadUid() + HomesteadsContract.NOTIFICATIONS);
 
                             Intent intent = new Intent(HomesteadCreateJoinActivity.this,
                                     MainActivity.class);

@@ -8,6 +8,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 /**
  * Created by pauldhaliwal on 2018-03-24.
@@ -204,12 +205,6 @@ public abstract class FirebaseResolver {
         final DatabaseReference databaseMessages = FirebaseDatabase.getInstance().
                 getReference(MessagesContract.ROOT_NODE);
 
-        final DatabaseReference senderNotifications = FirebaseDatabase
-                .getInstance()
-                .getReference(UsersContract.ROOT_NODE)
-                .child(CurrentUser.getUid())
-                .child(UsersContract.NOTIFICATIONS);
-
         final DatabaseReference homesteadNotifications = FirebaseDatabase
                 .getInstance()
                 .getReference(HomesteadsContract.ROOT_NODE)
@@ -374,6 +369,9 @@ public abstract class FirebaseResolver {
                 .getReference()
                 .child(UsersContract.ROOT_NODE)
                 .child(userUid);
+
+        FirebaseMessaging.getInstance()
+                .unsubscribeFromTopic(CurrentUser.getHomesteadUid() + HomesteadsContract.NOTIFICATIONS);
 
         userRef.child(UsersContract.HOMESTEAD_ID).removeValue();
 

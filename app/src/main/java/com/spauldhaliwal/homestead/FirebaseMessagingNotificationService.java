@@ -50,8 +50,10 @@ public class FirebaseMessagingNotificationService extends FirebaseMessagingServi
         String homesteadMessageId = HomesteadsContract.HOMESTEAD_MESSAGES_ID;
 
         String channelId;
-        if (!notificationSenderUid.equals(CurrentUser.getUid())
-                && !notificationSenderUid.equals(homesteadMessageId)) {
+        if (!notificationSenderUid.equals(CurrentUser.getUid()))
+//                && !notificationSenderUid.equals(homesteadMessageId))
+        {
+            Log.d(TAG, "onMessageReceived: ");
             //only send in-app notifications if the senderUid and currentUserUid are not the same
 
             if (notificationType.equals(MessagesContract.TYPE)) {

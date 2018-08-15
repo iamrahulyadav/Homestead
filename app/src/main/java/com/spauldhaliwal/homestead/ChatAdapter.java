@@ -255,36 +255,16 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     Log.d(TAG, "Select onDismiss: mSelectedPosition = " + mSelectedPosition
                             + " isSelected = " + isSelected
                             + " position = " + position);
-
-//                    mExpandedPosition = isExpanded ? -1 : position;
-//                    mSelectedPosition = isSelected ? -1 : position;
-
-                    if (isExpanded) {
-                        TransitionManager.endTransitions(mRecyclerView);
-                        TransitionSet collapsingAnimation = new TransitionSet();
-                        collapsingAnimation.addTransition(new Fade().setDuration(90))
-                                .addTransition(new ChangeBounds().setDuration(225))
-                                .setOrdering(TransitionSet.ORDERING_TOGETHER);
-
-                        TransitionManager.beginDelayedTransition(mRecyclerView, collapsingAnimation);
-                        mExpandedPosition = -1;
-                    } else {
-                        TransitionManager.endTransitions(mRecyclerView);
-                        Transition fadeOut = new Fade().setStartDelay(70).setDuration(120);
-                        Transition expand = new ChangeBounds().setDuration(225);
-                        TransitionSet expandingAnimation = new TransitionSet()
-                                .addTransition(fadeOut)
-                                .addTransition(expand)
-                                .setOrdering(TransitionSet.ORDERING_TOGETHER);
-                        TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
-                        mExpandedPosition = position;
-                    }
-
-                    if (isSelected) {
-                        mSelectedPosition = -1;
-                    } else {
-                        mSelectedPosition = position;
-                    }
+                    TransitionManager.endTransitions(mRecyclerView);
+                    Transition fadeOut = new Fade().setStartDelay(90).setDuration(120);
+                    Transition expand = new ChangeBounds().setDuration(225);
+                    TransitionSet expandingAnimation = new TransitionSet()
+                            .addTransition(fadeOut)
+                            .addTransition(expand)
+                            .setOrdering(TransitionSet.ORDERING_TOGETHER);
+                    TransitionManager.beginDelayedTransition(mRecyclerView, expandingAnimation);
+                    mExpandedPosition = isExpanded ? -1 : position;
+                    mSelectedPosition = isSelected ? -1 : position;
 
                     notifyItemChanged(mPreviousExpandedPosition);
                     notifyItemChanged(mPreviousSelectedPosition);
@@ -737,7 +717,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public void setProfileImage(String d) {
 
-            Glide.with(message.getContext())
+            Glide.with(itemView.getContext())
                     .load(Uri.parse(d))
                     .apply(RequestOptions.circleCropTransform())
                     .into(profileImage);
@@ -788,7 +768,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView messageBody;
         TextView messageTimestamp;
         View actionView;
-
         public UtilityMessageHolder(View itemView) {
             super(itemView);
             messageTitle = itemView.findViewById(R.id.utitlityMessageTitle);

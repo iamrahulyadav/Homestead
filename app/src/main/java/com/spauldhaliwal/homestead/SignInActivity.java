@@ -253,7 +253,7 @@ public class SignInActivity extends AppCompatActivity {
                                                     // Retrieve homestead invite id if it exists.
                                                     Uri deepLink = null;
                                                     if (pendingDynamicLinkData != null) {
-                                                        //Homestead id exists, loading join activity
+                                                        //Homestead invite id exists, loading join activity
                                                         // with id in intent.
                                                         Intent intent = getIntent();
                                                         Uri uri = intent.getData();
