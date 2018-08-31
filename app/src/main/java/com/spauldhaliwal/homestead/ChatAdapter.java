@@ -71,6 +71,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_MESSAGE_OUTGOING = 9;
     private static final int VIEW_TYPE_MESSAGE_OUTGOING_SAME_SENDER = 10;
 
+
+    private static final int VIEW_TYPE_MESSAGE_HOMESTEAD_FIRST = -2;
     private static final int VIEW_TYPE_MESSAGE_HOMESTEAD = -1;
 
     private Set<Integer> incomingMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING,
@@ -88,7 +90,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private String homesteadMessageId = HomesteadsContract.HOMESTEAD_MESSAGES_ID;
 
-    private Set<Integer> homesteadMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_HOMESTEAD));
+    private Set<Integer> homesteadMessages = new HashSet<Integer>(Arrays.asList(VIEW_TYPE_MESSAGE_HOMESTEAD, VIEW_TYPE_MESSAGE_HOMESTEAD_FIRST));
 
     private List<MessageModel> messagesList;
     private LayoutInflater layoutInflater;
@@ -122,7 +124,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             nextMessage = (MessageModel) this.getItem(position + 1);
 
         }
-        if (model.getSenderUid().equals(homesteadMessageId)) {
+        if (position == 0
+                && model.getSenderUid().equals(homesteadMessageId)) {
+            Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_HOMESTEAD_FIRST);
+            return VIEW_TYPE_MESSAGE_HOMESTEAD_FIRST;
+        } else if (model.getSenderUid().equals(homesteadMessageId)) {
             Log.d(TAG, "getItemViewType: " + VIEW_TYPE_MESSAGE_HOMESTEAD);
             return VIEW_TYPE_MESSAGE_HOMESTEAD;
         } else if (position == 0
@@ -345,11 +351,21 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         switch (holder.getItemViewType()) {
             case VIEW_TYPE_MESSAGE_HOMESTEAD:
+                Log.d(TAG, "onBindViewHolder: " + VIEW_TYPE_MESSAGE_HOMESTEAD);
                 String title = model.getSenderName() + " added a new task to the Homestead";
                 String body = model.getMessage();
                 ((UtilityMessageHolder) holder).setMessageTitle(title);
                 ((UtilityMessageHolder) holder).setMessageBody(body);
                 ((UtilityMessageHolder) holder).setMessageTimestamp(model.getTimeSent());
+                break;
+            case VIEW_TYPE_MESSAGE_HOMESTEAD_FIRST:
+                Log.d(TAG, "onBindViewHolder: " + VIEW_TYPE_MESSAGE_HOMESTEAD_FIRST);
+                title = model.getSenderName() + " added a new task to the Homestead";
+                body = model.getMessage();
+                ((UtilityMessageHolder) holder).setMessageTitle(title);
+                ((UtilityMessageHolder) holder).setMessageBody(body);
+                ((UtilityMessageHolder) holder).setMessageTimestamp(model.getTimeSent());
+                ((UtilityMessageHolder) holder).utilityMessageTopSpacer.setVisibility(View.INVISIBLE);
                 break;
             case VIEW_TYPE_MESSAGE_FIRST_MESSAGE_INCOMING:
                 ((IncomingMessageHolder) holder).setMessage(model.getMessage());
@@ -768,12 +784,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         TextView messageBody;
         TextView messageTimestamp;
         View actionView;
+        Space utilityMessageTopSpacer;
+
         public UtilityMessageHolder(View itemView) {
             super(itemView);
             messageTitle = itemView.findViewById(R.id.utitlityMessageTitle);
             messageBody = itemView.findViewById(R.id.utilityMessageBody);
             messageTimestamp = itemView.findViewById(R.id.utilityMessageTimeStamp);
             actionView = itemView.findViewById(R.id.utilityMessageActionView);
+            utilityMessageTopSpacer = itemView.findViewById(R.id.utilityMessageTopSpacer);
         }
 
         public TextView getMessageTitle() {
