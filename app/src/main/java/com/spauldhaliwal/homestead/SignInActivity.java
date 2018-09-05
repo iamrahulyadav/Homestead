@@ -34,6 +34,8 @@ public class SignInActivity extends AppCompatActivity {
 
     private static final String TAG = "SignInActivity";
     private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthStateListener;
 
     public static final int RC_SIGN_IN = 1;
     public static final int CREATE_HOMESTEAD_REQUEST = 2;
@@ -44,93 +46,184 @@ public class SignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate: SignIn Activity Starts");
         super.onCreate(savedInstanceState);
-        final FirebaseAuth auth = FirebaseAuth.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
-        if (auth.getCurrentUser() != null) {
-            // User is already signed in
-            Log.d(TAG, "SignInActivity onCreate: already signed in");
-            Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
-
-            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
-                @Override
-                public void onSuccess() {
-                    //Persist user data using SharedPrefences
-                    SharedPreferences sharedPref = mContext.getSharedPreferences(
-                            "com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
-                            Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
-                    editor.putString(UsersContract.HOMESTEAD_NAME, CurrentUser.getHomesteadName());
-                    editor.putString(UsersContract.UID, CurrentUser.getUid());
-                    editor.putString(UsersContract.NAME, CurrentUser.getName());
-                    editor.putString(UsersContract.PROFILE_IMAGE, CurrentUser.getProfileImage());
+        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                Log.d(TAG, "onAuthStateChanged: starts");
+                if (firebaseAuth.getCurrentUser() != null) {
+                    // User is already signed in
+                    Log.d(TAG, "SignInActivity onCreate: already signed in");
                     Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
-                    editor.apply();
 
-                    if (CurrentUser.getHomesteadUid() != null) {
-                        // User belongs to a homestead.
-                        Intent launchMainActivityIntent = new Intent(SignInActivity.this, MainActivity.class)
-                                .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
-                        startActivity(launchMainActivityIntent);
-                        finish();
-                        overridePendingTransition(0, 0);
+                    CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
+                        @Override
+                        public void onSuccess() {
+                            //Persist user data using SharedPrefences
+                            SharedPreferences sharedPref = mContext.getSharedPreferences(
+                                    "com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+                                    Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+                            editor.putString(UsersContract.HOMESTEAD_NAME, CurrentUser.getHomesteadName());
+                            editor.putString(UsersContract.UID, CurrentUser.getUid());
+                            editor.putString(UsersContract.NAME, CurrentUser.getName());
+                            editor.putString(UsersContract.PROFILE_IMAGE, CurrentUser.getProfileImage());
+                            Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+                            editor.apply();
 
-                    } else {
-                        // User does not belong to a homestead
-                        Log.d(TAG, "onSuccess: User does not belong to a homestead");
-
-                        FirebaseDynamicLinks.getInstance()
-                                .getDynamicLink(getIntent())
-                                .addOnSuccessListener(SignInActivity.this,
-                                        new OnSuccessListener<PendingDynamicLinkData>() {
-
-                                            @Override
-                                            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                                                // Retrieve homestead invite id if it exists.
-                                                Uri deepLink = null;
-                                                if (pendingDynamicLinkData != null) {
-                                                    Intent intent = getIntent();
-                                                    Uri uri = intent.getData();
-                                                    String homesteadInviteId = uri.getQueryParameter("homesteadid");
-                                                    Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
-
-                                                    Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
-                                                            .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
-                                                    createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
-                                                    startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
-                                                } else {
-                                                    Log.d(TAG, "onSuccess: Homestead invite id does not exist");
-                                                    Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
-                                                            .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
-                                                    startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
-                                                }
-                                            }
-
-                                        }).addOnFailureListener(SignInActivity.this, new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-
-                                Log.d(TAG, "getDynamicLink onFailure: " + e);
-                                Toast.makeText(SignInActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(SignInActivity.this, MainActivity.class)
+                            if (CurrentUser.getHomesteadUid() != null) {
+                                // User belongs to a homestead.
+                                Intent launchMainActivityIntent = new Intent(SignInActivity.this, MainActivity.class)
                                         .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
-                                startActivity(intent);
-                            }
-                        });
-                    }
-                }
-            });
+                                startActivity(launchMainActivityIntent);
+                                finish();
+                                overridePendingTransition(0, 0);
 
-        } else {
-            // User is not signed in
-            Log.d(TAG, "SignInActivity onCreate: not signed in");
-            startActivityForResult(AuthUI.getInstance()
-                            .createSignInIntentBuilder()
-                            .setAvailableProviders(Arrays.asList(
-                                    new AuthUI.IdpConfig.GoogleBuilder().build()
-                            )).build(),
-                    RC_SIGN_IN);
-        }
+                            } else {
+                                // User does not belong to a homestead
+                                Log.d(TAG, "onSuccess: User does not belong to a homestead");
+
+                                FirebaseDynamicLinks.getInstance()
+                                        .getDynamicLink(getIntent())
+                                        .addOnSuccessListener(SignInActivity.this,
+                                                new OnSuccessListener<PendingDynamicLinkData>() {
+
+                                                    @Override
+                                                    public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                                                        // Retrieve homestead invite id if it exists.
+                                                        Uri deepLink = null;
+                                                        if (pendingDynamicLinkData != null) {
+                                                            Intent intent = getIntent();
+                                                            Uri uri = intent.getData();
+                                                            String homesteadInviteId = uri.getQueryParameter("homesteadid");
+                                                            Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
+
+                                                            Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+                                                                    .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+                                                            createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
+                                                            startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+                                                        } else {
+                                                            Log.d(TAG, "onSuccess: Homestead invite id does not exist");
+                                                            Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+                                                                    .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+                                                            startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+                                                        }
+                                                    }
+
+                                                }).addOnFailureListener(SignInActivity.this, new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                        Log.d(TAG, "getDynamicLink onFailure: " + e);
+                                        Toast.makeText(SignInActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(SignInActivity.this, MainActivity.class)
+                                                .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+                                        startActivity(intent);
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                } else {
+                    // User is not signed in
+                    Log.d(TAG, "SignInActivity onCreate: not signed in");
+                    startActivityForResult(AuthUI.getInstance()
+                                    .createSignInIntentBuilder()
+                                    .setAvailableProviders(Arrays.asList(
+                                            new AuthUI.IdpConfig.GoogleBuilder().build()
+                                    )).build(),
+                            RC_SIGN_IN);
+                }
+            }
+        };
+//        if (mAuth.getCurrentUser() != null) {
+//            // User is already signed in
+//            Log.d(TAG, "SignInActivity onCreate: already signed in");
+//            Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+//
+//            CurrentUser.buildUser(new CurrentUser.OnGetDataListener() {
+//                @Override
+//                public void onSuccess() {
+//                    //Persist user data using SharedPrefences
+//                    SharedPreferences sharedPref = mContext.getSharedPreferences(
+//                            "com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
+//                            Context.MODE_PRIVATE);
+//                    SharedPreferences.Editor editor = sharedPref.edit();
+//                    editor.putString(UsersContract.HOMESTEAD_ID, CurrentUser.getHomesteadUid());
+//                    editor.putString(UsersContract.HOMESTEAD_NAME, CurrentUser.getHomesteadName());
+//                    editor.putString(UsersContract.UID, CurrentUser.getUid());
+//                    editor.putString(UsersContract.NAME, CurrentUser.getName());
+//                    editor.putString(UsersContract.PROFILE_IMAGE, CurrentUser.getProfileImage());
+//                    Log.d(TAG, "SignInActivity onCreate: CurrentUser.getHomesteadID: " + CurrentUser.getHomesteadUid());
+//                    editor.apply();
+//
+//                    if (CurrentUser.getHomesteadUid() != null) {
+//                        // User belongs to a homestead.
+//                        Intent launchMainActivityIntent = new Intent(SignInActivity.this, MainActivity.class)
+//                                .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+//                        startActivity(launchMainActivityIntent);
+//                        finish();
+//                        overridePendingTransition(0, 0);
+//
+//                    } else {
+//                        // User does not belong to a homestead
+//                        Log.d(TAG, "onSuccess: User does not belong to a homestead");
+//
+//                        FirebaseDynamicLinks.getInstance()
+//                                .getDynamicLink(getIntent())
+//                                .addOnSuccessListener(SignInActivity.this,
+//                                        new OnSuccessListener<PendingDynamicLinkData>() {
+//
+//                                            @Override
+//                                            public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+//                                                // Retrieve homestead invite id if it exists.
+//                                                Uri deepLink = null;
+//                                                if (pendingDynamicLinkData != null) {
+//                                                    Intent intent = getIntent();
+//                                                    Uri uri = intent.getData();
+//                                                    String homesteadInviteId = uri.getQueryParameter("homesteadid");
+//                                                    Log.d(TAG, "GetQuery: Homestead ID = " + uri.getQueryParameter("homesteadid"));
+//
+//                                                    Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+//                                                            .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+//                                                    createJoinHomesteadIntent.putExtra("homesteadInviteId", homesteadInviteId);
+//                                                    startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+//                                                } else {
+//                                                    Log.d(TAG, "onSuccess: Homestead invite id does not exist");
+//                                                    Intent createJoinHomesteadIntent = new Intent(SignInActivity.this, HomesteadCreateJoinActivity.class)
+//                                                            .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+//                                                    startActivityForResult(createJoinHomesteadIntent, CREATE_HOMESTEAD_REQUEST);
+//                                                }
+//                                            }
+//
+//                                        }).addOnFailureListener(SignInActivity.this, new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception e) {
+//
+//                                Log.d(TAG, "getDynamicLink onFailure: " + e);
+//                                Toast.makeText(SignInActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+//                                Intent intent = new Intent(SignInActivity.this, MainActivity.class)
+//                                        .addFlags(FLAG_ACTIVITY_NO_ANIMATION);
+//                                startActivity(intent);
+//                            }
+//                        });
+//                    }
+//                }
+//            });
+//
+//        } else {
+//            // User is not signed in
+//            Log.d(TAG, "SignInActivity onCreate: not signed in");
+//            startActivityForResult(AuthUI.getInstance()
+//                            .createSignInIntentBuilder()
+//                            .setAvailableProviders(Arrays.asList(
+//                                    new AuthUI.IdpConfig.GoogleBuilder().build()
+//                            )).build(),
+//                    RC_SIGN_IN);
+//        }
 
     }
 
@@ -297,7 +390,7 @@ public class SignInActivity extends AppCompatActivity {
 
             } else if (resultCode == RESULT_CANCELED)
 //                Toast.makeText(this, "Error joining homestead.", Toast.LENGTH_SHORT).show();
-            finish();
+                finish();
 
         } else {
             Log.d(TAG, "onActivityResult: sign in failed");
@@ -305,6 +398,13 @@ public class SignInActivity extends AppCompatActivity {
             Toast.makeText(this, "Sign-in Error", Toast.LENGTH_SHORT).show();
             finish();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mAuth.addAuthStateListener(mAuthStateListener);
     }
 
     @Override

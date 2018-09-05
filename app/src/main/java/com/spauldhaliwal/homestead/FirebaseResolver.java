@@ -22,6 +22,8 @@ public abstract class FirebaseResolver {
 
     static boolean insertJob(final String name, final String description, final String creatorId, final String creatorImage, final boolean isPrivate) {
 
+
+
         final DatabaseReference databaseJobs = FirebaseDatabase.getInstance().
                 getReference(JobsContract.ROOT_NODE);
 

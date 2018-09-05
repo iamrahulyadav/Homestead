@@ -28,7 +28,7 @@ public class PersonalBoardFragment extends Fragment {
 
     DatabaseRecyclerAdapter firebaseAdapter;
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    private static final String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+    private String userUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
     Query query;
 
 
