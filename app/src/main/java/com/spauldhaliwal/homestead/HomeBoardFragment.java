@@ -33,6 +33,7 @@ public class HomeBoardFragment extends Fragment {
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private String homesteadId;
     private String homesteadName;
+    private HomeBoardPresenter presenter;
 
     @Nullable
     @Override
@@ -43,6 +44,8 @@ public class HomeBoardFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+//        presenter = new HomeBoardPresenter();
 
         SharedPreferences sharedPref = getActivity().getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
                 Context.MODE_PRIVATE);
