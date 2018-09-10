@@ -45,7 +45,8 @@ public class HomeBoardFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        presenter = new HomeBoardPresenter();
+        presenter = new HomeBoardPresenter(new HomeBoardView() {
+        });
 
         SharedPreferences sharedPref = getActivity().getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
                 Context.MODE_PRIVATE);
