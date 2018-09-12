@@ -21,12 +21,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import java.util.List;
+
 
 /**
  * Created by pauldhaliwal on 2018-03-12.
  */
 
-public class HomeBoardFragment extends Fragment {
+public class HomeBoardFragment extends Fragment implements HomeBoardView {
     private static final String TAG = "HomeBoardFragment";
 
     DatabaseRecyclerAdapter firebaseAdapter;
@@ -45,8 +47,13 @@ public class HomeBoardFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        presenter = new HomeBoardPresenter(new HomeBoardView() {
-        });
+
+        //****************** M V P *********************
+
+        presenter = new HomeBoardPresenter(this, null);
+
+
+        //****************** M V P *********************
 
         SharedPreferences sharedPref = getActivity().getSharedPreferences("com.spauldhaliwal.homestead.SignInActivity.PREFERENCES_FILE_KEY",
                 Context.MODE_PRIVATE);
@@ -54,7 +61,6 @@ public class HomeBoardFragment extends Fragment {
         homesteadName = sharedPref.getString(UsersContract.HOMESTEAD_NAME, null);
         Log.d(TAG, "HomeboardFragment onActivityCreated: homesteadId: " + homesteadId);
 
-        //TODO Display Homestead name. Implement in CurrentUser utiliy class.
         TextView homesteadNameTextView = getActivity().findViewById(R.id.homestead_task_list_header_text);
         homesteadNameTextView.setText(homesteadName);
 
@@ -101,4 +107,8 @@ public class HomeBoardFragment extends Fragment {
         firebaseAdapter.stopListening();
     }
 
+    @Override
+    public void displayTasks(List<JobModel> taskList) {
+
+    }
 }

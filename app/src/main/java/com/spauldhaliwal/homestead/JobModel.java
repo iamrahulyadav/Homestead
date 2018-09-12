@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Created by pauldhaliwal on 2018-03-07.
  */
 
-class JobModel implements Serializable {
+public class JobModel implements Serializable {
 
     private String id;
     private String name;
