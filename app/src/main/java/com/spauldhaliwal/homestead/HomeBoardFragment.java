@@ -111,4 +111,9 @@ public class HomeBoardFragment extends Fragment implements HomeBoardView {
     public void displayTasks(List<JobModel> taskList) {
 
     }
+
+    @Override
+    public void displayNoTasks() {
+
+    }
 }

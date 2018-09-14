@@ -14,9 +14,13 @@ class HomeBoardPresenter {
         this.tasksRepository = tasksRepository;
     }
 
-
     public void loadTasks() {
         List taskList = tasksRepository.getTasks();
-        view.displayTasks(taskList);
+
+        if (taskList.isEmpty()) {
+            view.displayNoTasks();
+        } else {
+            view.displayTasks(taskList);
+        }
     }
 }
