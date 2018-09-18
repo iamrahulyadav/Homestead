@@ -6,4 +6,5 @@ public interface HomeBoardView {
     void displayTasks(List<JobModel> taskList);
 
     void displayNoTasks();
+
 }

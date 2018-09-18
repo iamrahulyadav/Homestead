@@ -6,11 +6,11 @@ package com.spauldhaliwal.homestead;
 
 public class HomesteadsContract {
 
-    static final String ROOT_NODE = "Homesteads";
-    static final String ID = "uId";
-    static final String NAME = "name";
-    static final String JOBS_NODE = "Jobs";
-    static final String NOTIFICATIONS = "_notifications";
-    static final String HOMESTEAD_MESSAGES_ID = "system_message";
+    public static final String ROOT_NODE = "Homesteads";
+    public static final String ID = "uId";
+    public static final String NAME = "name";
+    public static final String JOBS_NODE = "Jobs";
+    public static final String NOTIFICATIONS = "_notifications";
+    public static final String HOMESTEAD_MESSAGES_ID = "system_message";
 
 }
