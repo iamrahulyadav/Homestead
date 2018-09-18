@@ -19,8 +19,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.spauldhaliwal.homestead.repositories.impl.DatabaseTasksRepository;
 
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
-public class HomeBoardFragment extends Fragment implements HomeBoardView {
+public class HomeBoardFragment extends Fragment implements HomeBoardView, Observer {
     private static final String TAG = "HomeBoardFragment";
 
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -47,10 +49,14 @@ public class HomeBoardFragment extends Fragment implements HomeBoardView {
         homesteadId = sharedPref.getString(UsersContract.HOMESTEAD_ID, null);
         homesteadName = sharedPref.getString(UsersContract.HOMESTEAD_NAME, null);
         Log.d(TAG, "HomeboardFragment onActivityCreated: homesteadId: " + homesteadId);
+
         recyclerView = getActivity().findViewById(R.id.recycler_list_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         presenter = new HomeBoardPresenter(this, new DatabaseTasksRepository(homesteadId, homesteadName));
 
+        adapter = new TaskAdapter();
+        recyclerView.setAdapter(adapter);
+        adapter.request(homesteadId);
 
 
         presenter.loadTasks();
@@ -68,8 +74,7 @@ public class HomeBoardFragment extends Fragment implements HomeBoardView {
         Log.d(TAG, "displayTasks: found some tasks");
         Log.d(TAG, "displayTasks: taskList: " + taskList.toString());
 
-        adapter = new TaskAdapter(taskList);
-        recyclerView.setAdapter(adapter);
+
     }
 
     @Override
@@ -78,6 +83,10 @@ public class HomeBoardFragment extends Fragment implements HomeBoardView {
 
     }
 
+    @Override
+    public void update(Observable o, Object arg) {
+
+    }
 
 
 }

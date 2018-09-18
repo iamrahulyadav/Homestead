@@ -1,6 +1,6 @@
 package com.spauldhaliwal.homestead;
 
-import com.spauldhaliwal.homestead.repositories.TasksRepository;
+import com.spauldhaliwal.homestead.repositories.HomeboardTasksRepository;
 
 import junit.framework.Assert;
 
@@ -17,7 +17,7 @@ public class HomeBoardPresenterTest {
 
         // given
         HomeBoardView view = new MockView();
-        TasksRepository tasksRepository = new MockTasksRepository(true);
+        HomeboardTasksRepository tasksRepository = new MockTasksRepository(true);
 
         // when
         HomeBoardPresenter presenter = new HomeBoardPresenter(view, tasksRepository);
@@ -33,7 +33,7 @@ public class HomeBoardPresenterTest {
 
         // given
         HomeBoardView view = new MockView();
-        TasksRepository tasksRepository = new MockTasksRepository(false);
+        HomeboardTasksRepository tasksRepository = new MockTasksRepository(false);
 
         // when
         HomeBoardPresenter presenter = new HomeBoardPresenter(view, tasksRepository);
@@ -59,7 +59,7 @@ public class HomeBoardPresenterTest {
         }
     }
 
-    private class MockTasksRepository implements TasksRepository {
+    private class MockTasksRepository implements HomeboardTasksRepository {
 
         private boolean returnSomeTasks;
 

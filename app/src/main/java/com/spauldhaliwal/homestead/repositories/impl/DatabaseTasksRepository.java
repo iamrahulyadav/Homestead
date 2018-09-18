@@ -1,6 +1,5 @@
 package com.spauldhaliwal.homestead.repositories.impl;
 
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.google.firebase.database.ChildEventListener;
@@ -8,17 +7,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.spauldhaliwal.homestead.HomesteadsContract;
 import com.spauldhaliwal.homestead.JobModel;
 import com.spauldhaliwal.homestead.JobsContract;
-import com.spauldhaliwal.homestead.TaskAdapter;
-import com.spauldhaliwal.homestead.repositories.TasksRepository;
+import com.spauldhaliwal.homestead.repositories.HomeboardTasksRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseTasksRepository implements TasksRepository {
+public class DatabaseTasksRepository implements HomeboardTasksRepository {
     private static final String TAG = "DatabaseTasksRepository";
 
     String homesteadId;
@@ -43,27 +40,14 @@ public class DatabaseTasksRepository implements TasksRepository {
                 .child(HomesteadsContract.JOBS_NODE)
                 .orderByChild(JobsContract.SORT_ORDER);
 
-
         childEventListener = query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 JobModel job = dataSnapshot.getValue(JobModel.class);
 
-//                itemPos++;
-//
-//                if (itemPos == 1) {
-//                    String messageKey = dataSnapshot.getKey();
-//                    lastMessageKey = messageKey;
-//                    prevMessageKey = messageKey;
-//
-//                }
                 taskList.add(job);
                 Log.d(TAG, "onChildAdded: " + taskList.toString());
 
-//                currentPage++;
-//
-//                linearLayoutManager.smoothScrollToPosition(messageListView, null, chatAdapter.getItemCount() + 1);
-//                Log.d(TAG, "loadMessages: messages loaded: " + linearLayoutManager.getItemCount() + " // " + message);
             }
 
             @Override
@@ -96,9 +80,6 @@ public class DatabaseTasksRepository implements TasksRepository {
 //        taskList.add(job1);
 //        taskList.add(job2);
 //        taskList.add(job3);
-
-
-
 
         return taskList;
     }

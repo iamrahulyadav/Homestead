@@ -1,6 +1,7 @@
 package com.spauldhaliwal.homestead;
 
 import android.graphics.Paint;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -10,16 +11,22 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
+import java.util.ArrayList;
 import java.util.List;
 
-public class TaskAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class TaskAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements TaskAdapterView{
 
     private static final String TAG = "TaskAdapter";
 
-    private List<JobModel> taskList;
+    private List<JobModel> taskList = new ArrayList<>();
+    private final TaskPresenterImpl presenter;
 
-    public TaskAdapter(List<JobModel> taskList) {
-        this.taskList = taskList;
+    public TaskAdapter() {
+//        this.taskList = taskList;
+        presenter = new TaskPresenterImpl(this);
     }
 
     @NonNull
@@ -96,15 +103,27 @@ public class TaskAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             Log.d(TAG, "setCreatorImage: description == " + description);
             Log.d(TAG, "setCreatorImage: == " + creatorIdImage);
 
-//            Glide.with(name.getContext())
-//                    .load(Uri.parse(d))
-//                    .apply(RequestOptions.circleCropTransform())
-//                    .into(creatorIdImage);
+            Glide.with(name.getContext())
+                    .load(Uri.parse(d))
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(creatorIdImage);
         }
 
     }
 
     public JobModel getItem(int position) {
         return taskList.get(position);
+    }
+
+    @Override
+    public void addItem(JobModel task) {
+        taskList.add(task);
+        Log.d(TAG, "addItem: " + task.toString());
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public void request(String homesteadId) {
+        presenter.requestTasks(homesteadId);
     }
 }

@@ -1,21 +1,19 @@
 package com.spauldhaliwal.homestead;
 
-import android.support.v7.widget.RecyclerView;
+import android.arch.lifecycle.ViewModel;
 
-import com.spauldhaliwal.homestead.repositories.TasksRepository;
+import com.spauldhaliwal.homestead.repositories.HomeboardTasksRepository;
 
 import java.util.List;
 
-class HomeBoardPresenter {
+class HomeBoardPresenter extends ViewModel{
 
     private HomeBoardView view;
-    private TasksRepository tasksRepository;
-    private  TaskAdapter adapter;
+    private HomeboardTasksRepository tasksRepository;
 
-    public HomeBoardPresenter(HomeBoardView view, TasksRepository tasksRepository) {
+    public HomeBoardPresenter(HomeBoardView view, HomeboardTasksRepository tasksRepository) {
         this.view = view;
         this.tasksRepository = tasksRepository;
-        this.adapter = adapter;
     }
 
     public void loadTasks() {

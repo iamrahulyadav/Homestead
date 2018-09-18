@@ -7,7 +7,7 @@ import com.spauldhaliwal.homestead.TaskAdapter;
 
 import java.util.List;
 
-public interface TasksRepository {
+public interface HomeboardTasksRepository {
 
     List<JobModel> getTasks();
 }
